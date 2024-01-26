@@ -273,9 +273,11 @@ bool WebServer::InitSocket_() {
     return true;
 }
 
+// 设置 fd 为非阻塞
 int WebServer::SetFdNonblock(int fd) {
     assert(fd > 0);
-    return fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
+    // 获取 fd 原来的 FL, 并修改为非阻塞, 设置为新的 FL
+    return fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 }
 
 
