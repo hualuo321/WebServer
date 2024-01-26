@@ -154,38 +154,43 @@ void Log::write(int level, const char *format, ...) {
     }
 }
 
+// 根据日志级别添加日志标题
 void Log::AppendLogLevelTitle_(int level) {
     switch(level) {
     case 0:
-        buff_.Append("[debug]: ", 9);
+        buff_.Append("[debug]: ", 9);   // 如果级别为0，添加"[debug]: "到缓冲区
         break;
     case 1:
-        buff_.Append("[info] : ", 9);
+        buff_.Append("[info] : ", 9);   // 如果级别为1，添加"[info] : "到缓冲区
         break;
     case 2:
-        buff_.Append("[warn] : ", 9);
+        buff_.Append("[warn] : ", 9);   // 如果级别为2，添加"[warn] : "到缓冲区
         break;
     case 3:
-        buff_.Append("[error]: ", 9);
+        buff_.Append("[error]: ", 9);   // 如果级别为3，添加"[error]: "到缓冲区
         break;
     default:
-        buff_.Append("[info] : ", 9);
+        buff_.Append("[info] : ", 9);   // 默认情况下，添加"[info] : "到缓冲区
         break;
     }
 }
 
+// 刷新日志缓冲区
 void Log::flush() {
-    if(isAsync_) { 
+    if(isAsync_) {
+        // 如果是异步模式，刷新日志队列
         deque_->flush(); 
     }
+    // 刷新文件流，确保所有日志数据被写入文件
     fflush(fp_);
 }
 
+// 异步写入日志
 void Log::AsyncWrite_() {
     string str = "";
-    while(deque_->pop(str)) {
-        lock_guard<mutex> locker(mtx_);
-        fputs(str.c_str(), fp_);
+    while(deque_->pop(str)) {               // 循环从队列中取出日志数据
+        lock_guard<mutex> locker(mtx_);     // 锁定互斥量
+        fputs(str.c_str(), fp_);            // 将日志数据写入文件
     }
 }
 
