@@ -1,44 +1,42 @@
-/*
- * @Author       : mark
- * @Date         : 2020-06-16
- * @copyleft Apache 2.0
- */ 
 #include "log.h"
-
 using namespace std;
 
+// Log类的构造函数
 Log::Log() {
-    lineCount_ = 0;
-    isAsync_ = false;
-    writeThread_ = nullptr;
-    deque_ = nullptr;
-    toDay_ = 0;
-    fp_ = nullptr;
+    lineCount_ = 0;                         // 初始化行数计数器为0
+    isAsync_ = false;                       // 初始化异步标志为false
+    writeThread_ = nullptr;                 // 初始化写入线程unique_ptr为空
+    deque_ = nullptr;                       // 初始化日志队列unique_ptr为空
+    toDay_ = 0;                             // 初始化日期为0
+    fp_ = nullptr;                          // 初始化文件指针为空
 }
 
+// Log类的析构函数
 Log::~Log() {
-    if(writeThread_ && writeThread_->joinable()) {
-        while(!deque_->empty()) {
-            deque_->flush();
+    if(writeThread_ && writeThread_->joinable()) {  // 如果写入线程存在且可以被join
+        while(!deque_->empty()) {                   // 当日志队列不为空时
+            deque_->flush();                        // 刷新队列
         };
-        deque_->Close();
-        writeThread_->join();
+        deque_->Close();                            // 关闭队列
+        writeThread_->join();                       // 加入写入线程
     }
-    if(fp_) {
-        lock_guard<mutex> locker(mtx_);
-        flush();
-        fclose(fp_);
+    if(fp_) {                                       // 如果文件指针不为空
+        lock_guard<mutex> locker(mtx_);             // 创建互斥锁的锁定器
+        flush();                                    // 刷新输出缓冲区
+        fclose(fp_);                                // 关闭文件
     }
 }
 
+// 获取日志等级的方法
 int Log::GetLevel() {
-    lock_guard<mutex> locker(mtx_);
-    return level_;
+    lock_guard<mutex> locker(mtx_);                 // 创建互斥锁的锁定器
+    return level_;                                  // 返回当前日志等级
 }
 
+// 设置日志等级的方法
 void Log::SetLevel(int level) {
-    lock_guard<mutex> locker(mtx_);
-    level_ = level;
+    lock_guard<mutex> locker(mtx_);                 // 创建互斥锁的锁定器
+    level_ = level;                                 // 设置当前日志等级
 }
 
 void Log::init(int level = 1, const char* path, const char* suffix,
