@@ -72,10 +72,9 @@ void Log::init(int level = 1, const char* path, const char* suffix, int maxQueue
     snprintf(fileName, LOG_NAME_LEN - 1, "%s/%04d_%02d_%02d%s", 
             path_, t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, suffix_);
     toDay_ = t.tm_mday;
-
     {
         lock_guard<mutex> locker(mtx_);             // 锁定互斥量
-        buff_.RetrieveAll();                        // 清空缓冲区
+        buff_.RetrieveAll();                        // 读取全部数据
         if(fp_) { 
             flush();                                // 刷新文件流
             fclose(fp_);                            // 关闭文件
