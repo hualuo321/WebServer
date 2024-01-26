@@ -193,6 +193,9 @@ int close(int fd);
 # fcntl: 对 fd 进行控制操作, 其中可以为复制 fd, 获取状态标识(如阻塞/非阻塞行为)
 int fcntl(int fd, int cmd, ... /* arg */);
 
+# fopen: 读取文件名为 file 的文件, 以 mode 模式打开 (返回一个 FILE 结构体指针)
+FILE *fopen(const char *file, const char *mode);
 
+# fflush: 刷新 FILE 缓存区中的内容到设备
 int fflush(FILE *stream);
 ```
