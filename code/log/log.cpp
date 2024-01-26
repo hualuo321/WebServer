@@ -39,72 +39,78 @@ void Log::SetLevel(int level) {
     level_ = level;                                 // 设置当前日志等级
 }
 
-void Log::init(int level = 1, const char* path, const char* suffix,
-    int maxQueueSize) {
-    isOpen_ = true;
-    level_ = level;
+// 初始化日志系统
+void Log::init(int level = 1, const char* path, const char* suffix, int maxQueueSize) {
+    isOpen_ = true;                                 // 设置日志系统为开启状态
+    level_ = level;                                 // 设置日志等级
+
     if(maxQueueSize > 0) {
+        // 如果最大队列大于0，则设置为异步模式                        
         isAsync_ = true;
-        if(!deque_) {
+        if(!deque_) {                               // 如果双端队列不存在，则创建之
             unique_ptr<BlockDeque<std::string>> newDeque(new BlockDeque<std::string>);
             deque_ = move(newDeque);
-            
+            // 创建一个新的写入线程
             std::unique_ptr<std::thread> NewThread(new thread(FlushLogThread));
             writeThread_ = move(NewThread);
         }
     } else {
+        // 如果最大队列大小为0，则设置为同步模式
         isAsync_ = false;
     }
 
-    lineCount_ = 0;
+    lineCount_ = 0;                                 // 行计数器重置为0
 
-    time_t timer = time(nullptr);
+    time_t timer = time(nullptr);                   // 获取当前时间，并格式化文件名
     struct tm *sysTime = localtime(&timer);
     struct tm t = *sysTime;
-    path_ = path;
-    suffix_ = suffix;
+    path_ = path;                                   // 设置文件路径
+    suffix_ = suffix;                               // 设置文件后缀
     char fileName[LOG_NAME_LEN] = {0};
     snprintf(fileName, LOG_NAME_LEN - 1, "%s/%04d_%02d_%02d%s", 
             path_, t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, suffix_);
     toDay_ = t.tm_mday;
 
     {
-        lock_guard<mutex> locker(mtx_);
-        buff_.RetrieveAll();
+        lock_guard<mutex> locker(mtx_);             // 锁定互斥量
+        buff_.RetrieveAll();                        // 清空缓冲区
         if(fp_) { 
-            flush();
-            fclose(fp_); 
+            flush();                                // 刷新文件流
+            fclose(fp_);                            // 关闭文件
         }
 
+        // 打开或创建文件
         fp_ = fopen(fileName, "a");
         if(fp_ == nullptr) {
+            // 如果文件夹不存在，则创建
             mkdir(path_, 0777);
             fp_ = fopen(fileName, "a");
         } 
-        assert(fp_ != nullptr);
+        assert(fp_ != nullptr);                     // 确保文件打开成功
     }
 }
 
+// 写入日志的函数
 void Log::write(int level, const char *format, ...) {
     struct timeval now = {0, 0};
-    gettimeofday(&now, nullptr);
+    gettimeofday(&now, nullptr);                    // 获取当前时间
     time_t tSec = now.tv_sec;
-    struct tm *sysTime = localtime(&tSec);
+    struct tm *sysTime = localtime(&tSec);          // 转换为本地时间
     struct tm t = *sysTime;
     va_list vaList;
 
     /* 日志日期 日志行数 */
-    if (toDay_ != t.tm_mday || (lineCount_ && (lineCount_  %  MAX_LINES == 0)))
-    {
-        unique_lock<mutex> locker(mtx_);
+    if (toDay_ != t.tm_mday || (lineCount_ && (lineCount_  %  MAX_LINES == 0))) {
+        // 检查是否需要创建新的日志文件（日期变化或行数超过最大值）
+        unique_lock<mutex> locker(mtx_);            // 锁定互斥量
         locker.unlock();
         
         char newFile[LOG_NAME_LEN];
         char tail[36] = {0};
         snprintf(tail, 36, "%04d_%02d_%02d", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
 
-        if (toDay_ != t.tm_mday)
-        {
+        if (toDay_ != t.tm_mday) {
+            // 根据日期变化或行数超限制来更新文件名
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s%s", path_, tail, suffix_);
             toDay_ = t.tm_mday;
             lineCount_ = 0;
@@ -113,36 +119,38 @@ void Log::write(int level, const char *format, ...) {
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s-%d%s", path_, tail, (lineCount_  / MAX_LINES), suffix_);
         }
         
-        locker.lock();
-        flush();
-        fclose(fp_);
-        fp_ = fopen(newFile, "a");
-        assert(fp_ != nullptr);
+        locker.lock();                              // 重新锁定互斥量
+        flush();                                    // 刷新缓冲区
+        fclose(fp_);                                // 关闭旧文件
+        fp_ = fopen(newFile, "a");                  // 打开新文件
+        assert(fp_ != nullptr);                     // 确保文件打开成功
     }
 
     {
-        unique_lock<mutex> locker(mtx_);
-        lineCount_++;
+        unique_lock<mutex> locker(mtx_);            // 锁定互斥量
+        lineCount_++;                               // 增加行数计数
         int n = snprintf(buff_.BeginWrite(), 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
                     t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
                     t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
                     
-        buff_.HasWritten(n);
-        AppendLogLevelTitle_(level);
+        buff_.HasWritten(n);                        // 更新缓冲区写入位置
+        AppendLogLevelTitle_(level);                // 添加日志级别标题
 
-        va_start(vaList, format);
+        va_start(vaList, format);                   // 开始处理可变参数
         int m = vsnprintf(buff_.BeginWrite(), buff_.WritableBytes(), format, vaList);
-        va_end(vaList);
+        va_end(vaList);                             // 结束处理可变参数
 
-        buff_.HasWritten(m);
-        buff_.Append("\n\0", 2);
+        buff_.HasWritten(m);                        // 更新缓冲区写入位置
+        buff_.Append("\n\0", 2);                    // 添加换行和字符串结束符
 
         if(isAsync_ && deque_ && !deque_->full()) {
+            // 如果是异步模式且队列未满，则将日志信息加入队列
             deque_->push_back(buff_.RetrieveAllToStr());
         } else {
+            // 否则直接写入文件
             fputs(buff_.Peek(), fp_);
         }
-        buff_.RetrieveAll();
+        buff_.RetrieveAll();                        // 清空缓冲区
     }
 }
 
