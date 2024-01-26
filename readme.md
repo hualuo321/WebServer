@@ -123,3 +123,41 @@ next                            # 向下执行一行代码, 遇到函数不会�
 continue                        # 执行到下一个断点
 print                           # 打印变量信息  
 ```
+
+## GCC 参数
+```
+-E: 进行预处理, 生成预处理文件      g++ -E demo.cpp -o demo.i
+-S: 进行编译, 得到汇编代码文件      g++ -S demo.i -o demo.s
+-c: 进行汇编, 得到目标文件          g++ -c demo.s -o demo.o
+链接代码, 生成可执行目标文件        g++ demo1.o demo2.o -o demo -l 库名 -L 库路径 -I 头文件路径
+直接生成目标文件, 但保留中间文件    g++ demo.cpp -o demo -save-temps
+
+-o: 指定文件的输出名
+-L: 添加链接库的路径
+-l: 添加链接库的名称 
+-I: 添加头文件的路径
+-g: 产生调制信息
+-Wall: 显示所有警告信息
+-w: 关闭所有警告信息
+-O[n]: 编辑器的优化级别
+```
+
+## 静态库, 动态库
+```
+# 当前有 3 个文件, 分别是 demo.cpp, demo.h, main.cpp
+
+# 创建静态库
+g++ -c demo.cpp -o demo.o
+ar rcs libdemo.a demo.o
+
+# 使用静态库
+g++ main.cpp -o main -I 头文件路径 -l 库名称 -L 库路径
+
+# 创建动态库, 得到和位置无关的带吗
+g++ -c -fpic demo.cpp -o demo.o
+g++ -shared demo.o -o libdemo.so
+
+# 使用动态库
+export LD_LIBRARY_PATH = 动态库路径
+g++ main.cpp -o main -I 头文件路径 -l 库名称
+```
