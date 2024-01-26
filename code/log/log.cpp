@@ -74,7 +74,7 @@ void Log::init(int level = 1, const char* path, const char* suffix, int maxQueue
     toDay_ = t.tm_mday;
     {
         lock_guard<mutex> locker(mtx_);             // 锁定互斥量
-        buff_.RetrieveAll();                        // 读取全部数据
+        buff_.RetrieveAll();                        // 清空缓冲区
         if(fp_) { 
             flush();                                // 刷新文件流
             fclose(fp_);                            // 关闭文件
@@ -134,7 +134,7 @@ void Log::write(int level, const char *format, ...) {
                     t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
                     t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
                     
-        buff_.HasWritten(n);                        // 更新缓冲区写入位置
+        buff_.HasWritten(n);                        // 更新缓冲区的写入位置
         AppendLogLevelTitle_(level);                // 添加日志级别标题
 
         va_start(vaList, format);                   // 开始处理可变参数
@@ -145,8 +145,8 @@ void Log::write(int level, const char *format, ...) {
         buff_.Append("\n\0", 2);                    // 添加换行和字符串结束符
 
         if(isAsync_ && deque_ && !deque_->full()) {
-            // 如果是异步模式且队列未满，则将日志信息加入队列
-            deque_->push_back(buff_.RetrieveAllToStr());
+            // 如果是异步模式且队列未满，则将日志信息加入队列, 读取全部数据并返回为字符串
+            deque_->push_back(buff_.RetrieveAllToStr());    
         } else {
             // 否则直接写入文件
             fputs(buff_.Peek(), fp_);
