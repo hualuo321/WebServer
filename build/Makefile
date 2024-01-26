@@ -21,6 +21,3 @@ all: $(OBJS)
 clean:
 	rm -rf ../bin/$(OBJS) $(TARGET)
 
-# 名称: 执行前所需依赖
-#	执行
-
