@@ -6,8 +6,8 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <mutex>
-#include <string>
+#include <mutex>                // 用于线程同步
+#include <string>               // 字符串操作
 #include <thread>
 #include <sys/time.h>
 #include <string.h>
