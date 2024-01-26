@@ -1,24 +1,25 @@
 #include "log.h"
+
 using namespace std;
 
-// Log类的构造函数
+// Log 类的构造函数
 Log::Log() {
-    lineCount_ = 0;                         // 初始化行数计数器为0
-    isAsync_ = false;                       // 初始化异步标志为false
-    writeThread_ = nullptr;                 // 初始化写入线程unique_ptr为空
-    deque_ = nullptr;                       // 初始化日志队列unique_ptr为空
-    toDay_ = 0;                             // 初始化日期为0
-    fp_ = nullptr;                          // 初始化文件指针为空
+    lineCount_ = 0;                         // 初始化行数计数器为 0
+    isAsync_ = false;                       // 初始化异步标志为 false
+    writeThread_ = nullptr;                 // 初始化写入线程 unique_ptr 为空
+    deque_ = nullptr;                       // 初始化日志队列 unique_ptr 为空
+    toDay_ = 0;                             // 初始化日期为 0
+    fp_ = nullptr;                          // 初始化 FILE 指针为空
 }
 
-// Log类的析构函数
+// Log 类的析构函数
 Log::~Log() {
-    if(writeThread_ && writeThread_->joinable()) {  // 如果写入线程存在且可以被join
+    if(writeThread_ && writeThread_->joinable()) {  // 如果写入线程存在且可以被j oin
         while(!deque_->empty()) {                   // 当日志队列不为空时
-            deque_->flush();                        // 刷新队列
+            deque_->flush();                        // 刷新队列, 等待队列为空
         };
         deque_->Close();                            // 关闭队列
-        writeThread_->join();                       // 加入写入线程
+        writeThread_->join();                       // 等待与 writeThread_ 关联的线程完成其执行
     }
     if(fp_) {                                       // 如果文件指针不为空
         lock_guard<mutex> locker(mtx_);             // 创建互斥锁的锁定器
@@ -29,6 +30,7 @@ Log::~Log() {
 
 // 获取日志等级的方法
 int Log::GetLevel() {
+    // 在这里，离开 GetLevel 函数的作用域，lock_guard 对象将被销毁, 自动释放锁
     lock_guard<mutex> locker(mtx_);                 // 创建互斥锁的锁定器
     return level_;                                  // 返回当前日志等级
 }
@@ -175,13 +177,13 @@ void Log::AppendLogLevelTitle_(int level) {
     }
 }
 
-// 刷新日志缓冲区
+// 刷新日志缓冲区, 处理异步模式下的日志队列
 void Log::flush() {
     if(isAsync_) {
-        // 如果是异步模式，刷新日志队列
+        // 如果是异步模式，通知消费者有数据可读
         deque_->flush(); 
     }
-    // 刷新文件流，确保所有日志数据被写入文件
+    // 清空文件流的输出缓冲区，确保所有缓存的日志数据都被写入到与 fp_ 相关联的文件中
     fflush(fp_);
 }
 
