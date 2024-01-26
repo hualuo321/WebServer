@@ -23,7 +23,7 @@ public:
     static void FlushLogThread();
     // 写日志，支持格式化输出
     void write(int level, const char *format,...);
-    // 刷新日志，将日志内容输出到文件或其他媒介
+    // 刷新日志，将日志内容输出到文件
     void flush();
     // 获取和设置日志等级
     int GetLevel();
@@ -60,7 +60,7 @@ private:
     int level_;
     // 是否异步
     bool isAsync_;
-    // 文件指针
+    // FILE 文件指针结构体 (其中包含 fp, 文件位置指针, 缓冲区等信息)
     FILE* fp_;
     // 日志队列，用于存储日志消息
     std::unique_ptr<BlockDeque<std::string>> deque_;
