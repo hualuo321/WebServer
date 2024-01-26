@@ -93,3 +93,33 @@ make
 * config配置
 * 完善单元测试
 * 实现循环缓冲区
+
+## makefile
+```
+target: prerequisites ...       # 目标文件: 依赖文件
+    command                     #   执行的命令
+
+clean:                          # 用来清除执行文件和中间文件
+	rm -rf ...
+
+$@: 目标文件的文件名
+$<: 第一个依赖文件名称
+$^: 所有依赖文件名称
+CXX: 用于编译 C++ 程序的程序；默认 g++
+CXXFLAGS: 提供给 C++ 编译器的额外标志
+%: 通配符
+``` 
+
+## GDB 命令
+```
+g++ demo.cpp -o demo -g         # 生成带有调试信息的可执行程序
+gdb demo                        # 启动 gdb 调试
+quit                            # 推出 gdb 调试
+list                            # 查看当前文件代码
+break n                         # 第 n 行打断点
+run                             # 运行, 遇到断点停止
+step                            # 向下单步执行, 遇到函数会进入函数体
+next                            # 向下执行一行代码, 遇到函数不会进入函数体
+continue                        # 执行到下一个断点
+print                           # 打印变量信息  
+```
