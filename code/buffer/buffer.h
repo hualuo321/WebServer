@@ -31,7 +31,7 @@ public:
     void Retrieve(size_t len);
     // 读取直到指定位置的数据
     void RetrieveUntil(const char* end);
-    // 读取全部数据
+    // 清空缓冲区
     void RetrieveAll() ;
     // 读取全部数据并返回为字符串
     std::string RetrieveAllToStr();
