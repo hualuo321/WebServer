@@ -161,3 +161,38 @@ g++ -shared demo.o -o libdemo.so
 export LD_LIBRARY_PATH = 动态库路径
 g++ main.cpp -o main -I 头文件路径 -l 库名称
 ```
+
+## IO 操作
+```
+# 通过 open 打开文件
+int fd  = open("file.txt", O_RDONLY);
+if (fd == -1) perror("open");
+
+# 读写操作
+char buf[1024] = {0};
+int len = 0;
+while ((len = read(fd, buf, sizeof(buf))) > 0) {
+    write(destfd, buf, len);
+}
+```
+
+## 常用库函数
+```
+# open: 打开路径为 path 的文件, flags 为打开模式, mode 为文件权限
+int open(const char *path, int flags, mode_t mode);
+
+# read: 从 fd 中读取数据到 buf, 指定读取 count 字节 (返回已读取的字节数)
+ssize_t read(int fd, void *buf, size_t count);
+
+# write: 将 buf 中的数据写入到 fd 中, 指定写入 count 字节 (返回已写入的字节数)
+ssize_t write(int fd, const void *buf, size_t count);
+
+# close: 关闭 fd 所指向的文件 (返回时候成功关闭)
+int close(int fd);
+
+# fcntl: 对 fd 进行控制操作, 其中可以为复制 fd, 获取状态标识(如阻塞/非阻塞行为)
+int fcntl(int fd, int cmd, ... /* arg */);
+
+
+int fflush(FILE *stream);
+```
