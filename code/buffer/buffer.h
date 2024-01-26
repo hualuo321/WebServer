@@ -21,7 +21,7 @@ public:
     size_t ReadableBytes() const ;
     // 返回预备区的字节数
     size_t PrependableBytes() const;
-    // 获取缓冲区数据起始位置的指针
+    // 返回缓冲区中可读数据的指针
     const char* Peek() const;
     // 确保缓冲区有足够的可写空间
     void EnsureWriteable(size_t len);
