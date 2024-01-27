@@ -5,13 +5,13 @@
 #include <stdlib.h>
 
 int main() {
-    // 1. ´´½¨¿Í»§¶Ë socket
+    // 1. åˆ›å»ºå®¢æˆ·ç«¯ socket
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (lfd == -1) {
         perror("socket");
         exit(-1);
     }
-    // 2. Á¬½Ó·şÎñ¶Ë
+    // 2. è¿æ¥æœåŠ¡ç«¯
     struct sockaddr_in serveraddr;
     serveraddr.sin_family = AF_INET;
     inet_pton(AF_INET, "192.168.110.129", &serveraddr.sin_addr.s_addr);
@@ -21,13 +21,13 @@ int main() {
         perror("connect");
         exit(-1);
     }
-    // 3. Í¨ĞÅ
+    // 3. é€šä¿¡
     char recvBuf[1024] = {0};
     while(1) {
         char* data = "hello, i am client";
-        // ¸ø·şÎñ¶Ë·¢ËÍÊı¾İ
+        // ç»™æœåŠ¡ç«¯å‘é€æ•°æ®
         write(fd, data, strlen);
-        // »ñÈ¡·şÎñ¶ËµÄÊı¾İ
+        // è·å–æœåŠ¡ç«¯çš„æ•°æ®
         int len = read(fd, recvBuf, sizeof(recvBuf));
         if (len == -1) {
             perror("read");
@@ -41,7 +41,7 @@ int main() {
         sleep(1);
     }
 
-    // ¹Ø±ÕÎÄ¼şÃèÊö·û
+    // å…³é—­æ–‡ä»¶æè¿°ç¬¦
     close(fd);
     return 0;
 }
