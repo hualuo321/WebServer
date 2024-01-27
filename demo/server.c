@@ -11,7 +11,7 @@ int main() {
         perror("socket");
         exit(-1);
     }
-    // 2. 绑定
+    // 2. 绑定 IP 端口到 lfd
     struct sockaddr_in saddr;
     saddr.sin_family = AF_INET;             // 协议族
     saddr.sin_addr.s_addr = INADDR_ANY;     // IP
@@ -30,6 +30,7 @@ int main() {
     // 4. 接收客户端连接
     struct sockaddr_in clientaddr;
     int len = sizeof(clientaddr);
+    // 客户端 lfd 进行阻塞等待, 把等待到的连接用户域名端口信息放入到 clientaddr, 并返回其 cfd
     int cfd = accept(lfd, (struct sockaddr*)& clientaddr, &len);
     if (cfd == -1) {
         perror("accept");
@@ -39,7 +40,7 @@ int main() {
     char clientIP[16];
     inet_ntop(AF_INET, &clientaddr.sin_addr.s_addr, clientIP, sizeof(clientIP));
     unsigned short clinetPort = ntohs(clientaddr.sin_port);
-    printf("client ip is %d", clientIP, clinetPort);
+    printf("client ip is %s, port is %d\n", clientIP, clinetPort);
     // 5. 通信
     char recvBuf[1024] = {0};
     while(1) {
@@ -54,8 +55,8 @@ int main() {
             printf("client closed ...");
             break;
         }
-        char* data = "hello, i am server";
         // 给客户端发送数据
+        char* data = "hello, i am server";
         write(cdf, data, strlen(data));
     }
 
