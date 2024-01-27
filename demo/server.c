@@ -5,29 +5,29 @@
 #include <stdlib.h>
 
 int main() {
-    // 1. ´´½¨·şÎñ¶Ë socket ÓÃÓÚ¼àÌı
+    // 1. åˆ›å»ºæœåŠ¡ç«¯ socket ç”¨äºç›‘å¬
     int lfd = socket(AF_INET, SOCK_STREAM, 0);
     if (lfd == -1) {
         perror("socket");
         exit(-1);
     }
-    // 2. °ó¶¨
+    // 2. ç»‘å®š
     struct sockaddr_in saddr;
-    saddr.sin_family = AF_INET;             // Ğ­Òé×å
+    saddr.sin_family = AF_INET;             // åè®®æ—
     saddr.sin_addr.s_addr = INADDR_ANY;     // IP
-    saddr.sin_port = htons(9999);           // ¶Ë¿ÚºÅ
+    saddr.sin_port = htons(9999);           // ç«¯å£å·
     int ret = bind(lfd, (struct sockaddr*)& saddr, sizeof(saddr));
     if (ret == -1) {
         perror("bind");
         exit(-1);
     }
-    // 3. ¼àÌı
+    // 3. ç›‘å¬
     ret = listen(lfd, 8);
     if (ret == -1) {
         perror("listen");
         exit(-1);
     }
-    // 4. ½ÓÊÕ¿Í»§¶ËÁ¬½Ó
+    // 4. æ¥æ”¶å®¢æˆ·ç«¯è¿æ¥
     struct sockaddr_in clientaddr;
     int len = sizeof(clientaddr);
     int cfd = accept(lfd, (struct sockaddr*)& clientaddr, &len);
@@ -35,15 +35,15 @@ int main() {
         perror("accept");
         exit(-1);
     }
-    // Êä³ö¿Í»§¶ËĞÅÏ¢
+    // è¾“å‡ºå®¢æˆ·ç«¯ä¿¡æ¯
     char clientIP[16];
     inet_ntop(AF_INET, &clientaddr.sin_addr.s_addr, clientIP, sizeof(clientIP));
     unsigned short clinetPort = ntohs(clientaddr.sin_port);
     printf("client ip is %d", clientIP, clinetPort);
-    // 5. Í¨ĞÅ
+    // 5. é€šä¿¡
     char recvBuf[1024] = {0};
     while(1) {
-        // »ñÈ¡¿Í»§¶ËµÄÊı¾İ
+        // è·å–å®¢æˆ·ç«¯çš„æ•°æ®
         int num = read(cfd, recvBuf, sizeof(recvBuf));
         if (num == -1) {
             perror("read");
@@ -55,11 +55,11 @@ int main() {
             break;
         }
         char* data = "hello, i am server";
-        // ¸ø¿Í»§¶Ë·¢ËÍÊı¾İ
+        // ç»™å®¢æˆ·ç«¯å‘é€æ•°æ®
         write(cdf, data, strlen(data));
     }
 
-    // ¹Ø±ÕÎÄ¼şÃèÊö·û
+    // å…³é—­æ–‡ä»¶æè¿°ç¬¦
     close(cfd);
     close(lfd);
     return 0;
