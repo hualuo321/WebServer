@@ -6,189 +6,189 @@
 #include <condition_variable>
 #include <sys/time.h>
 
-// Ä£°åÀà BlockDeque, ÓÃÓÚÊµÏÖÒ»¸ö×èÈûË«¶Ë¶ÓÁĞ
+// æ¨¡æ¿ç±» BlockDeque, ç”¨äºå®ç°ä¸€ä¸ªé˜»å¡åŒç«¯é˜Ÿåˆ—
 template<class T>
 class BlockDeque {
 public:
-    // ¹¹Ôìº¯Êı£¬Ö¸¶¨×î´óÈİÁ¿£¬Ä¬ÈÏÎª1000
+    // æ„é€ å‡½æ•°ï¼ŒæŒ‡å®šæœ€å¤§å®¹é‡ï¼Œé»˜è®¤ä¸º1000
     explicit BlockDeque(size_t MaxCapacity = 1000);
-    // Îö¹¹º¯Êı
+    // ææ„å‡½æ•°
     ~BlockDeque();
-    // Çå¿Õ¶ÓÁĞ
+    // æ¸…ç©ºé˜Ÿåˆ—
     void clear();
-    // ÅĞ¶Ï¶ÓÁĞÊÇ·ñÎª¿Õ
+    // åˆ¤æ–­é˜Ÿåˆ—æ˜¯å¦ä¸ºç©º
     bool empty();
-    // ÅĞ¶Ï¶ÓÁĞÊÇ·ñÒÑÂú
+    // åˆ¤æ–­é˜Ÿåˆ—æ˜¯å¦å·²æ»¡
     bool full();
-    // ¹Ø±Õ¶ÓÁĞ
+    // å…³é—­é˜Ÿåˆ—
     void Close();
-    // »ñÈ¡¶ÓÁĞµ±Ç°´óĞ¡
+    // è·å–é˜Ÿåˆ—å½“å‰å¤§å°
     size_t size();
-    // »ñÈ¡¶ÓÁĞ×î´óÈİÁ¿
+    // è·å–é˜Ÿåˆ—æœ€å¤§å®¹é‡
     size_t capacity();
-    // »ñÈ¡¶ÓÁĞÍ·²¿ÔªËØ
+    // è·å–é˜Ÿåˆ—å¤´éƒ¨å…ƒç´ 
     T front();
-    // »ñÈ¡¶ÓÁĞÎ²²¿ÔªËØ
+    // è·å–é˜Ÿåˆ—å°¾éƒ¨å…ƒç´ 
     T back();
-    // ÔÚ¶ÓÁĞÎ²²¿Ìí¼ÓÔªËØ
+    // åœ¨é˜Ÿåˆ—å°¾éƒ¨æ·»åŠ å…ƒç´ 
     void push_back(const T &item);
-    // ÔÚ¶ÓÁĞÍ·²¿Ìí¼ÓÔªËØ
+    // åœ¨é˜Ÿåˆ—å¤´éƒ¨æ·»åŠ å…ƒç´ 
     void push_front(const T &item);
-    // ´Ó¶ÓÁĞÍ·²¿ÒÆ³ıÔªËØ£¬Èç¹û¶ÓÁĞÎª¿ÕÔòµÈ´ı
+    // ä»é˜Ÿåˆ—å¤´éƒ¨ç§»é™¤å…ƒç´ ï¼Œå¦‚æœé˜Ÿåˆ—ä¸ºç©ºåˆ™ç­‰å¾…
     bool pop(T &item);
-    // ´Ó¶ÓÁĞÍ·²¿ÒÆ³ıÔªËØ£¬Èç¹û¶ÓÁĞÎª¿ÕÔòµÈ´ıÒ»¶¨Ê±¼ä
+    // ä»é˜Ÿåˆ—å¤´éƒ¨ç§»é™¤å…ƒç´ ï¼Œå¦‚æœé˜Ÿåˆ—ä¸ºç©ºåˆ™ç­‰å¾…ä¸€å®šæ—¶é—´
     bool pop(T &item, int timeout);
-    // Í¨ÖªÏû·ÑÕßÓĞÊı¾İ¿É¶Á
+    // é€šçŸ¥æ¶ˆè´¹è€…æœ‰æ•°æ®å¯è¯»
     void flush();
 
 private:
-    // STLË«¶Ë¶ÓÁĞ£¬ÓÃÓÚ´æ´¢ÔªËØ
+    // STLåŒç«¯é˜Ÿåˆ—ï¼Œç”¨äºå­˜å‚¨å…ƒç´ 
     std::deque<T> deq_;
-    // ¶ÓÁĞµÄ×î´óÈİÁ¿
+    // é˜Ÿåˆ—çš„æœ€å¤§å®¹é‡
     size_t capacity_;
-    // »¥³âÁ¿£¬ÓÃÓÚ±£»¤¶ÓÁĞ
+    // äº’æ–¥é‡ï¼Œç”¨äºä¿æŠ¤é˜Ÿåˆ—
     std::mutex mtx_;
-    // ±íÊ¾¶ÓÁĞÊÇ·ñ±»¹Ø±Õ
+    // è¡¨ç¤ºé˜Ÿåˆ—æ˜¯å¦è¢«å…³é—­
     bool isClose_;
-    // Ïû·ÑÕßÌõ¼ş±äÁ¿
+    // æ¶ˆè´¹è€…æ¡ä»¶å˜é‡
     std::condition_variable condConsumer_;
-    // Éú²úÕßÌõ¼ş±äÁ¿
+    // ç”Ÿäº§è€…æ¡ä»¶å˜é‡
     std::condition_variable condProducer_;
 };
 
-// ¹¹Ôìº¯Êı£¬³õÊ¼»¯¶ÓÁĞµÄ×î´óÈİÁ¿
+// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–é˜Ÿåˆ—çš„æœ€å¤§å®¹é‡
 template<class T>
 BlockDeque<T>::BlockDeque(size_t MaxCapacity) :capacity_(MaxCapacity) {
-    assert(MaxCapacity > 0);                        // ¶ÏÑÔ×î´óÈİÁ¿±ØĞë´óÓÚ0
-    isClose_ = false;                               // ³õÊ¼»¯¶ÓÁĞÎª¿ªÆô×´Ì¬
+    assert(MaxCapacity > 0);                        // æ–­è¨€æœ€å¤§å®¹é‡å¿…é¡»å¤§äº0
+    isClose_ = false;                               // åˆå§‹åŒ–é˜Ÿåˆ—ä¸ºå¼€å¯çŠ¶æ€
 }
 
-// Îö¹¹º¯Êı£¬¹Ø±Õ¶ÓÁĞ
+// ææ„å‡½æ•°ï¼Œå…³é—­é˜Ÿåˆ—
 template<class T>
 BlockDeque<T>::~BlockDeque() {
     Close();
 };
 
-// ¹Ø±Õ¶ÓÁĞ
+// å…³é—­é˜Ÿåˆ—
 template<class T>
 void BlockDeque<T>::Close() {
     {   
-        std::lock_guard<std::mutex> locker(mtx_);   // ¼ÓËø±£»¤
-        deq_.clear();                               // Çå¿Õ¶ÓÁĞ
-        isClose_ = true;                            // ÉèÖÃ¶ÓÁĞÎª¹Ø±Õ×´Ì¬
+        std::lock_guard<std::mutex> locker(mtx_);   // åŠ é”ä¿æŠ¤
+        deq_.clear();                               // æ¸…ç©ºé˜Ÿåˆ—
+        isClose_ = true;                            // è®¾ç½®é˜Ÿåˆ—ä¸ºå…³é—­çŠ¶æ€
     }
-    condProducer_.notify_all();                     // »½ĞÑËùÓĞµÈ´ıµÄÉú²úÕß
-    condConsumer_.notify_all();                     // »½ĞÑËùÓĞµÈ´ıµÄÏû·ÑÕß
+    condProducer_.notify_all();                     // å”¤é†’æ‰€æœ‰ç­‰å¾…çš„ç”Ÿäº§è€…
+    condConsumer_.notify_all();                     // å”¤é†’æ‰€æœ‰ç­‰å¾…çš„æ¶ˆè´¹è€…
 };
 
-// Í¨ÖªÏû·ÑÕßÓĞÊı¾İ¿É¶Á
+// é€šçŸ¥æ¶ˆè´¹è€…æœ‰æ•°æ®å¯è¯»
 template<class T>
 void BlockDeque<T>::flush() {
-    condConsumer_.notify_one();                     // »½ĞÑÒ»¸öµÈ´ıµÄÏû·ÑÕß
+    condConsumer_.notify_one();                     // å”¤é†’ä¸€ä¸ªç­‰å¾…çš„æ¶ˆè´¹è€…
 };
 
-// Çå¿Õ¶ÓÁĞ
+// æ¸…ç©ºé˜Ÿåˆ—
 template<class T>
 void BlockDeque<T>::clear() {
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    deq_.clear();                                   // Çå¿Õ¶ÓÁĞ
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    deq_.clear();                                   // æ¸…ç©ºé˜Ÿåˆ—
 }
 
-// »ñÈ¡¶ÓÁĞÍ·²¿ÔªËØ
+// è·å–é˜Ÿåˆ—å¤´éƒ¨å…ƒç´ 
 template<class T>
 T BlockDeque<T>::front() {
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    return deq_.front();                            // ·µ»Ø¶ÓÁĞÍ·²¿ÔªËØ
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    return deq_.front();                            // è¿”å›é˜Ÿåˆ—å¤´éƒ¨å…ƒç´ 
 }
 
-// »ñÈ¡¶ÓÁĞÎ²²¿ÔªËØ
+// è·å–é˜Ÿåˆ—å°¾éƒ¨å…ƒç´ 
 template<class T>
 T BlockDeque<T>::back() {
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    return deq_.back();                             // ·µ»Ø¶ÓÁĞÎ²²¿ÔªËØ
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    return deq_.back();                             // è¿”å›é˜Ÿåˆ—å°¾éƒ¨å…ƒç´ 
 }
 
-// »ñÈ¡¶ÓÁĞµ±Ç°´óĞ¡
+// è·å–é˜Ÿåˆ—å½“å‰å¤§å°
 template<class T>
 size_t BlockDeque<T>::size() {
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    return deq_.size();                             // ·µ»Ø¶ÓÁĞ´óĞ¡
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    return deq_.size();                             // è¿”å›é˜Ÿåˆ—å¤§å°
 }
 
-// »ñÈ¡¶ÓÁĞ×î´óÈİÁ¿
+// è·å–é˜Ÿåˆ—æœ€å¤§å®¹é‡
 template<class T>
 size_t BlockDeque<T>::capacity() {
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    return capacity_;                               // ·µ»Ø¶ÓÁĞ×î´óÈİÁ¿
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    return capacity_;                               // è¿”å›é˜Ÿåˆ—æœ€å¤§å®¹é‡
 }
 
-// ÔÚ¶ÓÁĞÎ²²¿Ìí¼ÓÒ»¸öÔªËØ
+// åœ¨é˜Ÿåˆ—å°¾éƒ¨æ·»åŠ ä¸€ä¸ªå…ƒç´ 
 template<class T>
 void BlockDeque<T>::push_back(const T &item) {
-    std::unique_lock<std::mutex> locker(mtx_);      // ¼ÓËø±£»¤
+    std::unique_lock<std::mutex> locker(mtx_);      // åŠ é”ä¿æŠ¤
     while(deq_.size() >= capacity_) {
-        condProducer_.wait(locker);                 // Èç¹û¶ÓÁĞÒÑÂú£¬ÔòµÈ´ı
+        condProducer_.wait(locker);                 // å¦‚æœé˜Ÿåˆ—å·²æ»¡ï¼Œåˆ™ç­‰å¾…
     }
-    deq_.push_back(item);                           // Ïò¶ÓÁĞÎ²²¿Ìí¼ÓÔªËØ
-    condConsumer_.notify_one();                     // Í¨ÖªÒ»¸öµÈ´ıµÄÏû·ÑÕß
+    deq_.push_back(item);                           // å‘é˜Ÿåˆ—å°¾éƒ¨æ·»åŠ å…ƒç´ 
+    condConsumer_.notify_one();                     // é€šçŸ¥ä¸€ä¸ªç­‰å¾…çš„æ¶ˆè´¹è€…
 }
 
-// ÔÚ¶ÓÁĞÍ·²¿Ìí¼ÓÒ»¸öÔªËØ
+// åœ¨é˜Ÿåˆ—å¤´éƒ¨æ·»åŠ ä¸€ä¸ªå…ƒç´ 
 template<class T>
 void BlockDeque<T>::push_front(const T &item) {
-    std::unique_lock<std::mutex> locker(mtx_);      // ¼ÓËø±£»¤
+    std::unique_lock<std::mutex> locker(mtx_);      // åŠ é”ä¿æŠ¤
     while(deq_.size() >= capacity_) {               
-        condProducer_.wait(locker);                 // Èç¹û¶ÓÁĞÒÑÂú£¬ÔòµÈ´ı
+        condProducer_.wait(locker);                 // å¦‚æœé˜Ÿåˆ—å·²æ»¡ï¼Œåˆ™ç­‰å¾…
     }
-    deq_.push_front(item);                          // Ïò¶ÓÁĞÍ·²¿Ìí¼ÓÔªËØ
-    condConsumer_.notify_one();                     // Í¨ÖªÒ»¸öµÈ´ıµÄÏû·ÑÕß
+    deq_.push_front(item);                          // å‘é˜Ÿåˆ—å¤´éƒ¨æ·»åŠ å…ƒç´ 
+    condConsumer_.notify_one();                     // é€šçŸ¥ä¸€ä¸ªç­‰å¾…çš„æ¶ˆè´¹è€…
 }
 
-// ÅĞ¶Ï¶ÓÁĞÊÇ·ñÎª¿Õ
+// åˆ¤æ–­é˜Ÿåˆ—æ˜¯å¦ä¸ºç©º
 template<class T>
 bool BlockDeque<T>::empty() {
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    return deq_.empty();                            // ·µ»Ø¶ÓÁĞÊÇ·ñÎª¿Õ
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    return deq_.empty();                            // è¿”å›é˜Ÿåˆ—æ˜¯å¦ä¸ºç©º
 }
 
-// ÅĞ¶Ï¶ÓÁĞÊÇ·ñÒÑÂú
+// åˆ¤æ–­é˜Ÿåˆ—æ˜¯å¦å·²æ»¡
 template<class T>
 bool BlockDeque<T>::full(){
-    std::lock_guard<std::mutex> locker(mtx_);       // ¼ÓËø±£»¤
-    return deq_.size() >= capacity_;                // ·µ»Ø¶ÓÁĞÊÇ·ñÒÑÂú
+    std::lock_guard<std::mutex> locker(mtx_);       // åŠ é”ä¿æŠ¤
+    return deq_.size() >= capacity_;                // è¿”å›é˜Ÿåˆ—æ˜¯å¦å·²æ»¡
 }
 
-// ´Ó¶ÓÁĞÍ·²¿ÒÆ³ıÒ»¸öÔªËØ
+// ä»é˜Ÿåˆ—å¤´éƒ¨ç§»é™¤ä¸€ä¸ªå…ƒç´ 
 template<class T>
 bool BlockDeque<T>::pop(T &item) {
-    std::unique_lock<std::mutex> locker(mtx_);      // ¼ÓËø±£»¤
+    std::unique_lock<std::mutex> locker(mtx_);      // åŠ é”ä¿æŠ¤
     while(deq_.empty()){
-        condConsumer_.wait(locker);                 // Èç¹û¶ÓÁĞÎª¿Õ£¬ÔòµÈ´ı
+        condConsumer_.wait(locker);                 // å¦‚æœé˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™ç­‰å¾…
         if(isClose_){
-            return false;                           // Èç¹û¶ÓÁĞ¹Ø±Õ£¬Ôò·µ»Øfalse
+            return false;                           // å¦‚æœé˜Ÿåˆ—å…³é—­ï¼Œåˆ™è¿”å›false
         }
     }
-    item = deq_.front();                            // »ñÈ¡¶ÓÁĞÍ·²¿ÔªËØ
-    deq_.pop_front();                               // ´Ó¶ÓÁĞÍ·²¿ÒÆ³ıÔªËØ
-    condProducer_.notify_one();                     // Í¨ÖªÒ»¸öµÈ´ıµÄÉú²úÕß
+    item = deq_.front();                            // è·å–é˜Ÿåˆ—å¤´éƒ¨å…ƒç´ 
+    deq_.pop_front();                               // ä»é˜Ÿåˆ—å¤´éƒ¨ç§»é™¤å…ƒç´ 
+    condProducer_.notify_one();                     // é€šçŸ¥ä¸€ä¸ªç­‰å¾…çš„ç”Ÿäº§è€…
     return true;
 }
 
-// ´Ó¶ÓÁĞÍ·²¿ÒÆ³ıÒ»¸öÔªËØ£¬´ø³¬Ê±
+// ä»é˜Ÿåˆ—å¤´éƒ¨ç§»é™¤ä¸€ä¸ªå…ƒç´ ï¼Œå¸¦è¶…æ—¶
 template<class T>
 bool BlockDeque<T>::pop(T &item, int timeout) {
-    std::unique_lock<std::mutex> locker(mtx_);      // ¼ÓËø±£»¤
-    while(deq_.empty()){                            // Èç¹û¶ÓÁĞÎª¿Õ£¬ÔòµÈ´ı
+    std::unique_lock<std::mutex> locker(mtx_);      // åŠ é”ä¿æŠ¤
+    while(deq_.empty()){                            // å¦‚æœé˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™ç­‰å¾…
         if(condConsumer_.wait_for(locker, std::chrono::seconds(timeout)) == std::cv_status::timeout){
-            return false;                           // µÈ´ıÖ¸¶¨µÄ³¬Ê±Ê±¼ä, ³¬Ê±·µ»Øfalse
+            return false;                           // ç­‰å¾…æŒ‡å®šçš„è¶…æ—¶æ—¶é—´, è¶…æ—¶è¿”å›false
         }
         if(isClose_){
-            return false;                           // Èç¹û¶ÓÁĞ¹Ø±Õ£¬Ôò·µ»Øfalse
+            return false;                           // å¦‚æœé˜Ÿåˆ—å…³é—­ï¼Œåˆ™è¿”å›false
         }
     }
-    item = deq_.front();                            // »ñÈ¡¶ÓÁĞÍ·²¿ÔªËØ
-    deq_.pop_front();                               // ´Ó¶ÓÁĞÍ·²¿ÒÆ³ıÔªËØ
-    condProducer_.notify_one();                     // Í¨ÖªÒ»¸öµÈ´ıµÄÉú²úÕß
+    item = deq_.front();                            // è·å–é˜Ÿåˆ—å¤´éƒ¨å…ƒç´ 
+    deq_.pop_front();                               // ä»é˜Ÿåˆ—å¤´éƒ¨ç§»é™¤å…ƒç´ 
+    condProducer_.notify_one();                     // é€šçŸ¥ä¸€ä¸ªç­‰å¾…çš„ç”Ÿäº§è€…
     return true;
 }
 
