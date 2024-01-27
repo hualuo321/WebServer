@@ -4,5 +4,5 @@
 
 # gcc
 
-# linux º¯Êý
+# linux å‘½ä»¤
 
