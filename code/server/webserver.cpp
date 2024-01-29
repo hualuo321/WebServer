@@ -1,31 +1,21 @@
-/*
- * @Author       : mark
- * @Date         : 2020-06-17
- * @copyleft Apache 2.0
- */
-
 #include "webserver.h"
-
 using namespace std;
 
-WebServer::WebServer(
-            int port, int trigMode, int timeoutMS, bool OptLinger,
-            int sqlPort, const char* sqlUser, const  char* sqlPwd,
-            const char* dbName, int connPoolNum, int threadNum,
-            bool openLog, int logLevel, int logQueSize):
-            port_(port), openLinger_(OptLinger), timeoutMS_(timeoutMS), isClose_(false),
-            timer_(new HeapTimer()), threadpool_(new ThreadPool(threadNum)), epoller_(new Epoller())
-    {
-    srcDir_ = getcwd(nullptr, 256);
-    assert(srcDir_);
-    strncat(srcDir_, "/resources/", 16);
-    HttpConn::userCount = 0;
-    HttpConn::srcDir = srcDir_;
+// WebServer 类的构造函数
+WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger, int sqlPort, const char* sqlUser, const  char* sqlPwd,
+            const char* dbName, int connPoolNum, int threadNum, bool openLog, int logLevel, int logQueSize):
+            port_(port), openLinger_(OptLinger), timeoutMS_(timeoutMS), isClose_(false), timer_(new HeapTimer()), 
+            threadpool_(new ThreadPool(threadNum)), epoller_(new Epoller()) {
+    srcDir_ = getcwd(nullptr, 256);                                 // 获取当前工作目录
+    assert(srcDir_);                                                // 断言目录获取成功
+    strncat(srcDir_, "/resources/", 16);                            // 连接资源目录
+    HttpConn::userCount = 0;                                        // 初始化用户计数
+    HttpConn::srcDir = srcDir_;                                     // 设置静态资源目录
+    // 初始化SQL连接池
     SqlConnPool::Instance()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
-
-    InitEventMode_(trigMode);
-    if(!InitSocket_()) { isClose_ = true;}
-
+    InitEventMode_(trigMode);                                       // 初始化事件模式
+    if(!InitSocket_()) { isClose_ = true;}                          // 初始化套接字
+    // 如果打开日志记录
     if(openLog) {
         Log::Instance()->init(logLevel, "./log", ".log", logQueSize);
         if(isClose_) { LOG_ERROR("========== Server init error!=========="); }
@@ -42,11 +32,12 @@ WebServer::WebServer(
     }
 }
 
+// WebServer 类的析构函数
 WebServer::~WebServer() {
-    close(listenFd_);
-    isClose_ = true;
-    free(srcDir_);
-    SqlConnPool::Instance()->ClosePool();
+    close(listenFd_);                                               // 关闭监听文件描述符
+    isClose_ = true;                                                // 标记服务器关闭
+    free(srcDir_);                                                  // 释放资源目录字符串
+    SqlConnPool::Instance()->ClosePool();                           // 关闭SQL连接池
 }
 
 void WebServer::InitEventMode_(int trigMode) {
