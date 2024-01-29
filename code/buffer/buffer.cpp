@@ -13,7 +13,7 @@ size_t Buffer::WritableBytes() const {
     return buffer_.size() - writePos_;
 }
 
-// 表示已经读取的数据大小
+// 表示前面的已读位置, 可以重复使用, 装别的数据
 size_t Buffer::PrependableBytes() const {
     return readPos_;
 }
@@ -85,7 +85,7 @@ void Buffer::Append(const char* str, size_t len) {
     HasWritten(len);
 }
 
-// 追加另一个缓冲区的数据到当前缓冲区
+// 追加超过 buff_ 而存入临时缓冲区中的数据
 void Buffer::Append(const Buffer& buff) {
     Append(buff.Peek(), buff.ReadableBytes());
 }
@@ -93,7 +93,7 @@ void Buffer::Append(const Buffer& buff) {
 // 如果可写空间不足，扩充缓冲区
 void Buffer::EnsureWriteable(size_t len) {
     if(WritableBytes() < len) {
-        MakeSpace_(len);
+        MakeSpace_(len);                            // 追加原来 buff_ 的大小, 使其可以装下全部数据 
     }
     assert(WritableBytes() >= len);
 }
@@ -101,6 +101,7 @@ void Buffer::EnsureWriteable(size_t len) {
 // 从文件描述符中读取数据到缓冲区
 ssize_t Buffer::ReadFd(int fd, int* saveErrno) {
     char buff[65535];                               // 临时缓冲区
+    // 分散读, 一块指向当前 buffer_，一块指向临时缓冲区
     struct iovec iov[2];                            // 用于readv函数的两个iovec结构体，iov[0]用于写入数据到缓冲区，iov[1]用于保存多余的数据
     const size_t writable = WritableBytes();        // 设置iov[0]，指向当前可写位置，长度为可写字节数
     iov[0].iov_base = BeginPtr_() + writePos_;      // 分散读， 保证数据全部读完
