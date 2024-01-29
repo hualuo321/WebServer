@@ -70,7 +70,7 @@ void WebServer::InitEventMode_(int trigMode) {
 void WebServer::Start() {
     int timeMS = -1;                                                // epoll等待超时时间设置为-1，即无事件将阻塞
     if(!isClose_) { LOG_INFO("========== Server start =========="); }
-    while(!isClose_) {
+    while(!isClose_) {                                              // 服务器没有关闭, 则一直运行
         if(timeoutMS_ > 0) {
             timeMS = timer_->GetNextTick();
         }
@@ -126,7 +126,7 @@ void WebServer::AddClient_(int fd, sockaddr_in addr) {
         // 如果设置了超时时间，添加到定时器中
         timer_->add(fd, timeoutMS_, std::bind(&WebServer::CloseConn_, this, &users_[fd]));
     }
-    epoller_->AddFd(fd, EPOLLIN | connEvent_);                      // 将文件描述符添加到epoller
+    epoller_->AddFd(fd, EPOLLIN | connEvent_);                      // 将文件描述符添加到epoller, 监听读事件
     SetFdNonblock(fd);                                              // 设置文件描述符为非阻塞模式
     LOG_INFO("Client[%d] in!", users_[fd].GetFd());
 }
@@ -180,7 +180,7 @@ void WebServer::OnRead_(HttpConn* client) {
         CloseConn_(client);                                         // 如果读取出错并且错误不是EAGAIN，则关闭连接
         return;
     }
-    OnProcess(client);                                              // 处理读取到的数据
+    OnProcess(client);                                              // 处理读取到的数据 (解析 HTTP 请求)
 }
 
 // 处理客户端请求
