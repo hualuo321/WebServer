@@ -22,7 +22,7 @@ public:
 
 private:
     int epollFd_;                                   // epoll文件描述符
-    std::vector<struct epoll_event> events_;        // 用于存储epoll事件的向量
+    std::vector<struct epoll_event> events_;        // 用于存储epoll事件的集合
 };
 
 #endif //EPOLLER_H
