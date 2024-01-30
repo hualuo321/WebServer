@@ -4,6 +4,9 @@ git status 									// 查询修改状态
 git add .									// 想要提交所有的文件
 git commit -m "update"						// 为提交的代码添加提交注释
 git push -u origing master					// 将代码提交到主分支
+
+git fetch origin master						// 合并远程仓库代码
+git pull origin master						// 拉取远程仓库代码到本地
 ```
 
 # 常用函数
