@@ -1,5 +1,5 @@
-CXX = g++									
-CFLAGS = -std=c++14 -O2 -Wall -g 			
+CXX = g++
+CFLAGS = -std=c++14 -O2 -Wall -g 
 
 TARGET = server
 OBJS = ../code/log/*.cpp ../code/pool/*.cpp ../code/timer/*.cpp \
@@ -11,4 +11,3 @@ all: $(OBJS)
 
 clean:
 	rm -rf ../bin/$(OBJS) $(TARGET)
-

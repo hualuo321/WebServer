@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <sys/winsock.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "epoller.h"

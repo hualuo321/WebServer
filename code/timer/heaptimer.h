@@ -35,6 +35,13 @@ public:
     void adjust(int id, int newExpires);            // 调整定时器
     // 添加定时器
     void add(int id, int timeOut, const TimeoutCallBack& cb);
+    void doWork(int id);
+    void clear();
+    void tick();
+    void pop();
+    int GetNextTick();
+private:
+    void del_(size_t i);
     void siftup_(size_t i);                         // 向上调整堆
     bool siftdown_(size_t index, size_t n);         // 向下调整堆
     void SwapNode_(size_t i, size_t j);             // 交换节点
