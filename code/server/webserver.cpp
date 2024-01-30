@@ -1,21 +1,23 @@
 #include "webserver.h"
 using namespace std;
 
-// WebServer 类的构造函数
-WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger, int sqlPort, const char* sqlUser, const  char* sqlPwd,
-            const char* dbName, int connPoolNum, int threadNum, bool openLog, int logLevel, int logQueSize):
-            port_(port), openLinger_(OptLinger), timeoutMS_(timeoutMS), isClose_(false), timer_(new HeapTimer()), 
-            threadpool_(new ThreadPool(threadNum)), epoller_(new Epoller()) {
-    srcDir_ = getcwd(nullptr, 256);                                 // 获取当前工作目录
-    assert(srcDir_);                                                // 断言目录获取成功
-    strncat(srcDir_, "/resources/", 16);                            // 连接资源目录
-    HttpConn::userCount = 0;                                        // 初始化用户计数
-    HttpConn::srcDir = srcDir_;                                     // 设置静态资源目录
-    // 初始化SQL连接池
+// 构造函数
+WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger, int sqlPort, const char* sqlUser,  const  char* sqlPwd, 
+                    const char* dbName, int connPoolNum, int threadNum, bool openLog,  int logLevel, int logQueSize): 
+                    port_(port), openLinger_(OptLinger), timeoutMS_(timeoutMS),  isClose_(false), timer_(new HeapTimer()),  
+                    threadpool_(new ThreadPool(threadNum)),  epoller_(new Epoller()) {
+    srcDir_ = getcwd(nullptr, 256);                                 
+    assert(srcDir_);
+    strncat(srcDir_, "/resources/", 16);                            
+    HttpConn::userCount = 0;                                    // 初始化客户端连接数
+    HttpConn::srcDir = srcDir_;                                 // 获取静态资源目录
+    // 初始化 MySQL 连接池
     SqlConnPool::Instance()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
-    InitEventMode_(trigMode);                                       // 初始化事件模式
-    if(!InitSocket_()) { isClose_ = true;}                          // 初始化套接字
-    // 如果打开日志记录
+    // 初始化事件模式
+    InitEventMode_(trigMode);
+    // 初始化套接字                                    
+    if(!InitSocket_()) { isClose_ = true;}                          
+    // 初始化日志实例
     if(openLog) {
         Log::Instance()->init(logLevel, "./log", ".log", logQueSize);
         if(isClose_) { LOG_ERROR("========== Server init error!=========="); }
@@ -44,18 +46,19 @@ WebServer::~WebServer() {
 void WebServer::InitEventMode_(int trigMode) {
     listenEvent_ = EPOLLRDHUP;                                      // 默认监听事件 (读关闭)
     connEvent_ = EPOLLONESHOT | EPOLLRDHUP;                         // 默认连接事件 (ET | 读关闭)
+    // 根据输入选择模式
     switch (trigMode)
     {
     case 0:
         break;                                                      // 保持默认
     case 1:
-        connEvent_ |= EPOLLET;                                      // 只对连接使用边缘触发(ET)
+        connEvent_ |= EPOLLET;                                      // 只对连接事件使用边缘触发 (ET)
         break;
     case 2:
-        listenEvent_ |= EPOLLET;                                    // 只对监听使用边缘触发(ET)
+        listenEvent_ |= EPOLLET;                                    // 只对监听事件使用边缘触发 (ET)
         break;
     case 3:
-        listenEvent_ |= EPOLLET;                                    // 监听和连接都使用边缘触发(ET)
+        listenEvent_ |= EPOLLET;                                    // 监听和连接事件都使用边缘触发 (ET)
         connEvent_ |= EPOLLET;
         break;
     default:
@@ -63,7 +66,7 @@ void WebServer::InitEventMode_(int trigMode) {
         connEvent_ |= EPOLLET;
         break;
     }
-    HttpConn::isET = (connEvent_ & EPOLLET);                        // 设置Http连接是否使用ET模式
+    HttpConn::isET = (connEvent_ & EPOLLET);                        // 设置客户端是否为边缘触发 (ET)
 }
 
 // 启动Web服务器
@@ -217,7 +220,7 @@ void WebServer::OnWrite_(HttpConn* client) {
 bool WebServer::InitSocket_() {
     int ret;
     struct sockaddr_in addr;
-    if(port_ > 65535 || port_ < 1024) {                             // 检查端口号是否有效
+    if(port_ > 65535 || port_ < 1024) {                         // 检查端口号是否有效
         LOG_ERROR("Port:%d error!",  port_);
         return false;
     }
