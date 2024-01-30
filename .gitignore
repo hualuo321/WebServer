@@ -13,3 +13,5 @@
 *.exe
 /.vscode
 /build
+/testlog*
+/testThreadpool

@@ -1,3 +1,12 @@
+# 压力测试
+> 测试环境: Ubuntu 20.04, 配置信息: ecs.e-c1m2.large 2核(vCPU) 4 GiB
+
+```shell
+cd ./webbench/
+make
+./webbench -c 5000 -t 10 http://120.78.231.129:1316/
+```
+![avatar](./resources/md_img/webbench_test.jpg)
 # git 使用
 ```shell
 git status 									// 查询修改状态
