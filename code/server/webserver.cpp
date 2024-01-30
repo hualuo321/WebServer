@@ -216,38 +216,38 @@ void WebServer::OnWrite_(HttpConn* client) {
     CloseConn_(client);                                             // 关闭连接
 }
 
-// 初始化套接字
+// 初始化 socket
 bool WebServer::InitSocket_() {
     int ret;
-    struct sockaddr_in addr;
-    if(port_ > 65535 || port_ < 1024) {                         // 检查端口号是否有效
+    struct sockaddr_in addr;                                    // 存放服务端 socket 的地址信息
+    if(port_ > 65535 || port_ < 1024) {                         // 检查服务器端口号是否有效
         LOG_ERROR("Port:%d error!",  port_);
         return false;
     }
-    // 设置地址结构
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(port_);
-    // 设置 linger 选项以控制连接关闭的方式
+    // 设置服务端地址
+    addr.sin_family = AF_INET;                                  // 协议族类型
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);                   // IP 地址
+    addr.sin_port = htons(port_);                               // 端口号
+    // 设置 是否优雅关闭
     struct linger optLinger = { 0 };
     if(openLinger_) {                                               
         optLinger.l_onoff = 1;
         optLinger.l_linger = 1;
     }
-    // 创建监听套接字
+    // 创建监听 socket, 用于监听连接
     listenFd_ = socket(AF_INET, SOCK_STREAM, 0);
     if(listenFd_ < 0) {
         LOG_ERROR("Create socket error!", port_);
         return false;
     }
-    // 设置套接字选项
+    // 设置套接字选项, 这里设置的是优雅关闭
     ret = setsockopt(listenFd_, SOL_SOCKET, SO_LINGER, &optLinger, sizeof(optLinger));
     if(ret < 0) {
         close(listenFd_);
         LOG_ERROR("Init linger error!", port_);
         return false;
     }
-    // 设置端口复用, 只有最后一个套接字会正常接收数据。
+    // 设置套接字选项, 这里设置的是端口复用
     int optval = 1;
     ret = setsockopt(listenFd_, SOL_SOCKET, SO_REUSEADDR, (const void*)&optval, sizeof(int));
     if(ret == -1) {
@@ -255,21 +255,21 @@ bool WebServer::InitSocket_() {
         close(listenFd_);
         return false;
     }
-    // 绑定地址和端口
+    // 将服务端的 Socket 地址信息绑定到 listenFd 上
     ret = bind(listenFd_, (struct sockaddr *)&addr, sizeof(addr));
     if(ret < 0) {
         LOG_ERROR("Bind Port:%d error!", port_);
         close(listenFd_);
         return false;
     }
-    // 开始监听
+    // 将 listenFd 切换为监听状态
     ret = listen(listenFd_, 6);
     if(ret < 0) {
         LOG_ERROR("Listen port:%d error!", port_);
         close(listenFd_);
         return false;
     }
-    // 添加监听套接字到 epoll 实例
+    // 将 listenFd 添加到 epoll 实例 (可读事件)
     ret = epoller_->AddFd(listenFd_,  listenEvent_ | EPOLLIN);
     if(ret == 0) {
         LOG_ERROR("Add listen error!");
