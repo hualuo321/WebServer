@@ -15,24 +15,24 @@ SqlConnPool* SqlConnPool::Instance() {
 
 // 初始化连接池
 void SqlConnPool::Init(const char* host, int port, const char* user,const char* pwd, const char* dbName, int connSize = 10) {
-    assert(connSize > 0);                       // 断言连接池大小为正
-    // 初始化指定数量的MySQL连接
+    assert(connSize > 0);
+    // 初始化指定数量的 MySQL 连接
     for (int i = 0; i < connSize; i++) {
         MYSQL *sql = nullptr;
-        sql = mysql_init(sql);                  // 初始化MySQL对象
+        sql = mysql_init(sql);                  // 初始化 MySQL 对象
         if (!sql) {
-            LOG_ERROR("MySql init error!");     // 日志记录初始化失败
-            assert(sql);                        // 断言初始化成功
+            LOG_ERROR("MySql init error!");     
+            assert(sql);                        
         }
         // 连接MySQL数据库
         sql = mysql_real_connect(sql, host, user, pwd, dbName, port, nullptr, 0);
         if (!sql) {
-            LOG_ERROR("MySql Connect error!");  // 日志记录连接失败
+            LOG_ERROR("MySql Connect error!");
         }
-        connQue_.push(sql);                     // 将连接加入队列
+        connQue_.push(sql);                     // 将连接的 MySQL 放入连接池
     }
     MAX_CONN_ = connSize;                       // 设置最大连接数
-    sem_init(&semId_, 0, MAX_CONN_);            // 初始化信号量   
+    sem_init(&semId_, 0, MAX_CONN_);            // 初始化信号量 (初始为 MAX)
 }
 
 // 获取一个连接
