@@ -36,9 +36,9 @@ public:
         return request_.IsKeepAlive();
     }
 
-    static bool isET;                               // 是否使用边缘触发模式
+    static bool isET;                               // 是否使用边缘触发
     static const char* srcDir;                      // 静态资源目录
-    static std::atomic<int> userCount;              // 用户计数
+    static std::atomic<int> userCount;              // 客户端连接数
 
 private:
     int fd_;                                        // 文件描述符
