@@ -17,16 +17,13 @@
 #include "../pool/sqlconnRAII.h"
 #include "../http/httpconn.h"
 
-// Web 服务器类
+// 服务器类
 class WebServer {
 public:
-    // 构造函数
     WebServer(int port, int trigMode, int timeoutMS, bool OptLinger,  int sqlPort, const char* sqlUser, const  char* sqlPwd, 
         const char* dbName, int connPoolNum, int threadNum, bool openLog, int logLevel, int logQueSize);
-    // 析构函数
     ~WebServer();
-    // 启动服务器
-    void Start();
+    void Start();                                           // 启动服务器
 
 private:
     bool InitSocket_();                                     // 初始化 socket
@@ -42,14 +39,14 @@ private:
     void OnWrite_(HttpConn* client);                        // 写入数据处理
     void OnProcess(HttpConn* client);                       // 处理请求
 
-    static const int MAX_FD = 65536;                        // 最大文件描述符数量
-    static int SetFdNonblock(int fd);                       // 设置文件描述符为非阻塞模式
+    static const int MAX_FD = 65536;                        // 最大 fd 数量
+    static int SetFdNonblock(int fd);                       // 设置 fd 为非阻塞模式
 
     int port_;                                              // 服务器端口
     bool openLinger_;                                       // 是否开启优雅关闭
     int timeoutMS_;                                         // 超时时间（毫秒）
     bool isClose_;                                          // 是否关闭服务器
-    int listenFd_;                                          // 监听文件描述符
+    int listenFd_;                                          // 监听 fd 
     char* srcDir_;                                          // 静态资源目录
     
     uint32_t listenEvent_;                                  // 监听事件
@@ -58,7 +55,7 @@ private:
     std::unique_ptr<HeapTimer> timer_;                      // 定时器
     std::unique_ptr<ThreadPool> threadpool_;                // 线程池
     std::unique_ptr<Epoller> epoller_;                      // Epoll实例
-    std::unordered_map<int, HttpConn> users_;               // 存储所有客户端连接
+    std::unordered_map<int, HttpConn> users_;               // 存储客户端连接用户
 };
 
 #endif //WEBSERVER_H
