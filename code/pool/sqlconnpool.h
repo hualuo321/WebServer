@@ -18,20 +18,15 @@ public:
     int GetFreeConnCount();                         // 获取空闲连接数
     // 初始化连接池
     void Init(const char* host, int port, const char* user,const char* pwd, const char* dbName, int connSize);
-    // 关闭连接池
-    void ClosePool();
+    void ClosePool();                               // 关闭连接池
 
 private:
-    // 构造函数
-    SqlConnPool();
-    // 析构函数
-    ~SqlConnPool();
-    // 最大连接数
-    int MAX_CONN_;
-    // 当前使用的连接数
-    int useCount_;
-    // 空闲的连接数
-    int freeCount_;
+    SqlConnPool();                                  // 构造函数
+    ~SqlConnPool();                                 // 析构函数
+
+    int MAX_CONN_;                                  // 最大连接数
+    int useCount_;                                  // 当前使用的连接数
+    int freeCount_;                                 // 空闲的连接数
 
     std::queue<MYSQL *> connQue_;                   // 连接队列
     std::mutex mtx_;                                // 互斥锁
