@@ -7,6 +7,7 @@ make
 ./webbench -c 5000 -t 10 http://120.78.231.129:1316/
 ```
 ![avatar](./resources/md_img/webbench_test.jpg)
+
 # git 使用
 ```shell
 git status 									// 查询修改状态
@@ -25,6 +26,19 @@ int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 # setsockopt: 设置套接字选项 (sockfd, 代码级别, 要修改的选项, 缓冲区指针, 缓冲区大小) (操作是否成功)
 int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
 int ret = setsockopt(listenFd_, SOL_SOCKET, SO_LINGER, &optLinger, sizeof(optLinger));
+
+# epoll_create: 用于创建 epoll 实例 (epoll 可监听 fd 的大小)
+int epoll_create(int size);
+
+# epoll_ctl: 向 epoll 实例中添加或删除关注的 fd 
+# (epoll 实例 fd, 添加/修改/删除, 待操作的 fd, fd 的事件类型)
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+
+# epoll_wait: 等待已注册的 fd 上发生事件，并返回发生事件 fd 的数量
+int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+
+# close: 关闭一个已经使用的 socket, 并释放其资源
+int close(int sockfd);
 ```
 
 # 常用结构

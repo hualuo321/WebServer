@@ -105,6 +105,7 @@ void HeapTimer::tick() {
     }
     while(!heap_.empty()) {
         TimerNode node = heap_.front();
+        // 遇到没有超时的, 可以停止了, 前面超时的都被删了
         if(std::chrono::duration_cast<MS>(node.expires - Clock::now()).count() > 0) { 
             break; 
         }
@@ -125,12 +126,12 @@ void HeapTimer::clear() {
     heap_.clear();
 }
 
-// 获取下一次定时器触发时间
+// 获取下一个定时器距离超时的剩余时间
 int HeapTimer::GetNextTick() {
-    tick();
+    tick();                             // 清除超时的定时器
     size_t res = -1;
     if(!heap_.empty()) {
-        // 计算下一个定时器的剩余时间
+        // 计算下一个定时器距离超时的剩余时间
         res = std::chrono::duration_cast<MS>(heap_.front().expires - Clock::now()).count();
         if(res < 0) { res = 0; }
     }

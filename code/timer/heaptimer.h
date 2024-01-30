@@ -39,14 +39,14 @@ public:
     void clear();
     void tick();
     void pop();
-    int GetNextTick();
+    int GetNextTick();                              // 获取下一个定时器距离超时的剩余时间
 private:
     void del_(size_t i);
     void siftup_(size_t i);                         // 向上调整堆
     bool siftdown_(size_t index, size_t n);         // 向下调整堆
     void SwapNode_(size_t i, size_t j);             // 交换节点
     
-    std::vector<TimerNode> heap_;                   // 定时器堆
+    std::vector<TimerNode> heap_;                   // 小根堆定时器
     std::unordered_map<int, size_t> ref_;           // 定时器引用，用于快速定位
 };
 

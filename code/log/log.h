@@ -1,18 +1,18 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <mutex>                // 用于线程同步
-#include <string>               // 字符串操作
-#include <thread>               // 线程操作
-#include <sys/time.h>           // 时间函数
-#include <string.h>             // C风格的字符串操作
-#include <stdarg.h>             // 用于处理可变参数 va_start va_end
-#include <assert.h>             // 断言
-#include <sys/stat.h>           // 文件状态操作 mkdir
-#include "blockqueue.h"         // 阻塞队列头文件
-#include "../buffer/buffer.h"   // 缓冲区操作
+#include <mutex>
+#include <string>
+#include <thread>
+#include <sys/time.h>
+#include <string.h>
+#include <stdarg.h>
+#include <assert.h>
+#include <sys/stat.h>
+#include "blockqueue.h"
+#include "../buffer/buffer.h"
 
-// Log 类定义
+// Log 类
 class Log {
 public:
     // 初始化日志系统，设置日志等级、路径、文件后缀和队列最大容量
@@ -25,8 +25,9 @@ public:
     void write(int level, const char *format,...);
     // 刷新日志，将日志内容输出到文件
     void flush();
-    // 获取和设置日志等级
+    // 获取日志等级
     int GetLevel();
+    // 设置日志等级
     void SetLevel(int level);
     // 判断日志系统是否已开启
     bool IsOpen() { return isOpen_; }
@@ -40,26 +41,20 @@ private:
     void AsyncWrite_();
 
 private:
-    // 静态常量定义
-    static const int LOG_PATH_LEN = 256;
-    static const int LOG_NAME_LEN = 256;
-    static const int MAX_LINES = 50000;
-    // 日志路径和后缀
-    const char* path_;
-    const char* suffix_;
-    // 最大行数
-    int MAX_LINES_;
-    // 当前行数和日期
-    int lineCount_;
+    static const int LOG_PATH_LEN = 256;    // 路径长度
+    static const int LOG_NAME_LEN = 256;    // 文件名长度
+    static const int MAX_LINES = 50000;     // 单文件记录最大行数
+
+    const char* path_;                      // 日志路径
+    const char* suffix_;                    // 日期后缀
+    int MAX_LINES_;                         // 最大行数
+    int lineCount_;                         // 当前行数和日期
     int toDay_;
-    // 是否开启日志系统
-    bool isOpen_;
-    // 缓冲区
-    Buffer buff_;
-    // 日志等级
-    int level_;
-    // 是否异步
-    bool isAsync_;
+    bool isOpen_;                           // 是否开启日志系统
+    Buffer buff_;                           // 缓冲区
+    int level_;                             // 日志等级
+    bool isAsync_;                          // 是否异步
+
     // FILE 文件指针结构体 (其中包含 fp, 文件位置指针, 缓冲区等信息)
     FILE* fp_;
     // 日志队列，用于存储日志消息

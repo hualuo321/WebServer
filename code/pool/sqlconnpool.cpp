@@ -7,32 +7,32 @@ SqlConnPool::SqlConnPool() {
     freeCount_ = 0;                             // 空闲的连接数
 }
 
-// 获取单例实例
+// 获取一个连接池的单例
 SqlConnPool* SqlConnPool::Instance() {
-    static SqlConnPool connPool;                // 静态局部变量，确保只创建一次
+    static SqlConnPool connPool;            // 静态成员, 确保只能被创建一个, 所有对象共享
     return &connPool;
 }
 
 // 初始化连接池
 void SqlConnPool::Init(const char* host, int port, const char* user,const char* pwd, const char* dbName, int connSize = 10) {
     assert(connSize > 0);
-    // 初始化指定数量的 MySQL 连接
+    // 初始化指定数量的 SQL 连接对象
     for (int i = 0; i < connSize; i++) {
         MYSQL *sql = nullptr;
-        sql = mysql_init(sql);                  // 初始化 MySQL 对象
+        sql = mysql_init(sql);              // 初始化 SQL 连接对象
         if (!sql) {
-            LOG_ERROR("MySql init error!");     
-            assert(sql);                        
+            LOG_ERROR("MySql init error!");
+            assert(sql);
         }
-        // 连接MySQL数据库
+        // 将连接对象连接入 SQL 数据库
         sql = mysql_real_connect(sql, host, user, pwd, dbName, port, nullptr, 0);
         if (!sql) {
             LOG_ERROR("MySql Connect error!");
         }
-        connQue_.push(sql);                     // 将连接的 MySQL 放入连接池
+        connQue_.push(sql);                 // 将已连接的 SQL 对象放入连接池中
     }
-    MAX_CONN_ = connSize;                       // 设置最大连接数
-    sem_init(&semId_, 0, MAX_CONN_);            // 初始化信号量 (初始为 MAX)
+    MAX_CONN_ = connSize;                   // 设置最大连接数
+    sem_init(&semId_, 0, MAX_CONN_);        // 初始化信号量 (初始为 MAX)
 }
 
 // 获取一个连接

@@ -6,18 +6,18 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger, int 
                     const char* dbName, int connPoolNum, int threadNum, bool openLog,  int logLevel, int logQueSize): 
                     port_(port), openLinger_(OptLinger), timeoutMS_(timeoutMS),  isClose_(false), timer_(new HeapTimer()),  
                     threadpool_(new ThreadPool(threadNum)),  epoller_(new Epoller()) {
-    srcDir_ = getcwd(nullptr, 256);                                 
+    srcDir_ = getcwd(nullptr, 256);         // 获取静态资源地址
     assert(srcDir_);
-    strncat(srcDir_, "/resources/", 16);                            
-    HttpConn::userCount = 0;                                    // 初始化客户端连接数
-    HttpConn::srcDir = srcDir_;                                 // 获取静态资源目录
-    // 初始化 MySQL 连接池
+    strncat(srcDir_, "/resources/", 16); 
+    HttpConn::userCount = 0;                // 初始化用户连接数
+    HttpConn::srcDir = srcDir_;             // 初始化用户静态资源地址
+    // 初始化连接池单例
     SqlConnPool::Instance()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
     // 初始化事件模式
     InitEventMode_(trigMode);
-    // 初始化套接字                                    
+    // 初始化服务器监听 socket
     if(!InitSocket_()) { isClose_ = true;}                          
-    // 初始化日志实例
+    // 初始化日志单例
     if(openLog) {
         Log::Instance()->init(logLevel, "./log", ".log", logQueSize);
         if(isClose_) { LOG_ERROR("========== Server init error!=========="); }
@@ -34,7 +34,7 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger, int 
     }
 }
 
-// WebServer 类的析构函数
+// 析构函数
 WebServer::~WebServer() {
     close(listenFd_);                                               // 关闭监听文件描述符
     isClose_ = true;                                                // 标记服务器关闭
@@ -44,37 +44,37 @@ WebServer::~WebServer() {
 
 // 初始化事件模式
 void WebServer::InitEventMode_(int trigMode) {
-    listenEvent_ = EPOLLRDHUP;                                      // 默认监听事件 (读关闭)
-    connEvent_ = EPOLLONESHOT | EPOLLRDHUP;                         // 默认连接事件, ONESHOT 代表一个线程只能处理一个连接
+    listenEvent_ = EPOLLRDHUP;              // 默认监听事件 (读关闭)
+    connEvent_ = EPOLLONESHOT | EPOLLRDHUP; // 默认连接事件, ONESHOT 代表一个线程只能处理一个连接
     // 根据输入选择模式 (这些模式判断是通过位操作实现的, | 就是相应位置置 1, & 就是判断相应位置是否为 1)
     switch (trigMode)
     {
     case 0:
-        break;                                                      // 保持默认
+        break;                              // 保持默认
     case 1:
-        connEvent_ |= EPOLLET;                                      // 只对连接事件使用边缘触发 (ET)
+        connEvent_ |= EPOLLET;              // 只对连接事件使用边缘触发 (ET)
         break;
     case 2:
-        listenEvent_ |= EPOLLET;                                    // 只对监听事件使用边缘触发 (ET)
+        listenEvent_ |= EPOLLET;            // 只对监听事件使用边缘触发 (ET)
         break;
     case 3:
-        listenEvent_ |= EPOLLET;                                    // 监听和连接事件都使用边缘触发 (ET)
+        listenEvent_ |= EPOLLET;            // 监听和连接事件都使用边缘触发 (ET)
         connEvent_ |= EPOLLET;
         break;
     default:
-        listenEvent_ |= EPOLLET;                                    // 默认设置为边缘触发
+        listenEvent_ |= EPOLLET;            // 默认设置为边缘触发
         connEvent_ |= EPOLLET;
         break;
     }
-    HttpConn::isET = (connEvent_ & EPOLLET);                        // 设置客户端是否为边缘触发 (ET)
+    HttpConn::isET = (connEvent_ & EPOLLET);// 设置客户端是否为边缘触发 (ET)
 }
 
-// 启动Web服务器
+// 启动 Web 服务器
 void WebServer::Start() {
-    int timeMS = -1;                                                // epoll等待超时时间设置为-1，即无事件将阻塞
+    int timeMS = -1;                                    // 下一个定时器距离超时的剩余时间
     if(!isClose_) { LOG_INFO("========== Server start =========="); }
-    while(!isClose_) {                                              // 服务器没有关闭, 则一直运行
-        if(timeoutMS_ > 0) {
+    while(!isClose_) {                                  // 服务器没有关闭, 则一直运行
+        if(timeoutMS_ > 0) {                            // 超时时间初始化为 6000ms
             timeMS = timer_->GetNextTick();
         }
         int eventCnt = epoller_->Wait(timeMS);                      // 等待事件发生
@@ -216,21 +216,21 @@ void WebServer::OnWrite_(HttpConn* client) {
     CloseConn_(client);                                             // 关闭连接
 }
 
-// 初始化 socket
+// 初始化服务端的 socket
 bool WebServer::InitSocket_() {
     int ret;
-    struct sockaddr_in addr;                                    // 存放服务端 socket 的地址信息
-    if(port_ > 65535 || port_ < 1024) {                         // 检查服务器端口号是否有效
+    struct sockaddr_in addr;                // 存放服务端 socket 的地址信息
+    if(port_ > 65535 || port_ < 1024) {     // 检查服务器端口号是否有效
         LOG_ERROR("Port:%d error!",  port_);
         return false;
     }
-    // 设置服务端地址
-    addr.sin_family = AF_INET;                                  // 协议族类型
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);                   // IP 地址
-    addr.sin_port = htons(port_);                               // 端口号
+    // 设置服务端地址信息 (协议族类型, IP 地址, 端口号)
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(port_);
     // 设置 是否优雅关闭
     struct linger optLinger = { 0 };
-    if(openLinger_) {                                               
+    if(openLinger_) {
         optLinger.l_onoff = 1;
         optLinger.l_linger = 1;
     }
@@ -276,7 +276,7 @@ bool WebServer::InitSocket_() {
         close(listenFd_);
         return false;
     }
-    // 设置监听文件描述符为非阻塞模式
+    // 设置 listenFd 为非阻塞模式
     SetFdNonblock(listenFd_);
     LOG_INFO("Server port:%d", port_);
     return true;
