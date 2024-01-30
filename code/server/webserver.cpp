@@ -45,8 +45,8 @@ WebServer::~WebServer() {
 // 初始化事件模式
 void WebServer::InitEventMode_(int trigMode) {
     listenEvent_ = EPOLLRDHUP;                                      // 默认监听事件 (读关闭)
-    connEvent_ = EPOLLONESHOT | EPOLLRDHUP;                         // 默认连接事件 (ET | 读关闭)
-    // 根据输入选择模式
+    connEvent_ = EPOLLONESHOT | EPOLLRDHUP;                         // 默认连接事件, ONESHOT 代表一个线程只能处理一个连接
+    // 根据输入选择模式 (这些模式判断是通过位操作实现的, | 就是相应位置置 1, & 就是判断相应位置是否为 1)
     switch (trigMode)
     {
     case 0:
