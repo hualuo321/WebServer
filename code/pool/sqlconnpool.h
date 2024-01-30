@@ -25,10 +25,10 @@ private:
     ~SqlConnPool();                                 // 析构函数
 
     int MAX_CONN_;                                  // 最大连接数
-    int useCount_;                                  // 当前使用的连接数
+    int useCount_;                                  // 当前已使用的连接数
     int freeCount_;                                 // 空闲的连接数
 
-    std::queue<MYSQL *> connQue_;                   // 连接队列
+    std::queue<MYSQL *> connQue_;                   // MySQL 连接池队列
     std::mutex mtx_;                                // 互斥锁
     sem_t semId_;                                   // 信号量
 };
