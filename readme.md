@@ -1,9 +1,9 @@
 # git 使用
 ```git
-git status 														// 查询修改状态
-git add .														// 想要提交所有的文件
-git commit -m "update"											// 为提交的代码添加提交注释
-git push -u origing master										// 将代码提交到主分支
+git status 									// 查询修改状态
+git add .									// 想要提交所有的文件
+git commit -m "update"						// 为提交的代码添加提交注释
+git push -u origing master					// 将代码提交到主分支
 ```
 
 # 常用函数
@@ -21,15 +21,15 @@ int ret = setsockopt(listenFd_, SOL_SOCKET, SO_LINGER, &optLinger, sizeof(optLin
 ```cpp
 # 存放 socket 中的信息
 struct sockaddr_in {
-	short	sin_family;                                         // 协议族, 比如 IPv4(AF_INET)
-	u_short	sin_port;                                           // 端口号
-	struct in_addr	sin_addr;                                   // IP 地址
-	char	sin_zero[8];                                        // 填充字段
+	short	sin_family;						// 协议族, 比如 IPv4(AF_INET)
+	u_short	sin_port;						// 端口号
+	struct in_addr	sin_addr;				// IP 地址
+	char	sin_zero[8];					// 填充字段
 };
 
 # epoll 中的事件, 包含事件类型(位掩码实现), 和事件相关的额外信息
 struct epoll_event {
-    uint32_t     events;                                        // 可读(EPOLLIN), 可写(EPOLLOUT), 挂起(EPOLLHUP), ET(EPOLLET)
-    epoll_data_t data;                                          // 包含 fd, 指针, int32, int64
+    uint32_t     events;					// 可读(EPOLLIN), 可写(EPOLLOUT), 挂起(EPOLLHUP), ET(EPOLLET)
+    epoll_data_t data;						// 包含 fd, 指针, int32, int64
 };
 ```
