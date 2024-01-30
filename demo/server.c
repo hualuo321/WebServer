@@ -57,7 +57,7 @@ int main() {
         }
         // 给客户端发送数据
         char* data = "hello, i am server";
-        write(cdf, data, strlen(data));
+        write(cfd, data, strlen(data));
     }
 
     // 关闭文件描述符

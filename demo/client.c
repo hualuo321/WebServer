@@ -7,7 +7,7 @@
 int main() {
     // 1. 创建客户端 socket
     int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (lfd == -1) {
+    if (fd == -1) {
         perror("socket");
         exit(-1);
     }
