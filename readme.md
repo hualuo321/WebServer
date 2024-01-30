@@ -10,6 +10,7 @@ make
 
 # git 使用
 ```shell
+git clone git@github.com:hualuo321/My-WebServer.git
 git status 									// 查询修改状态
 git add .									// 想要提交所有的文件
 git commit -m "update"						// 为提交的代码添加提交注释
