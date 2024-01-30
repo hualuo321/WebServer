@@ -1,3 +1,11 @@
+# git 使用
+```git
+git status 														// 查询修改状态
+git add .														// 想要提交所有的文件
+git commit -m "update"											// 为提交的代码添加提交注释
+git push -u origing master										// 将代码提交到主分支
+```
+
 # 常用函数
 ```cpp
 # socket: 创建一个新的套接字 (协议族, 套接字类型, 是否为默认协议) (套接字 fd)
@@ -25,5 +33,3 @@ struct epoll_event {
     epoll_data_t data;                                          // 包含 fd, 指针, int32, int64
 };
 ```
-
-## 测试一下能否正常 push
