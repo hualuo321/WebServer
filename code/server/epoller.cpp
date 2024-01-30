@@ -11,9 +11,9 @@ Epoller::~Epoller() {
     close(epollFd_);                                            // 关闭epoll文件描述符
 }
 
-// 添加文件描述符到epoll实例
+// 添加 fd, 事件类型到 epoll 实例
 bool Epoller::AddFd(int fd, uint32_t events) {
-    if(fd < 0) return false;                                    // 检查文件描述符是否有效
+    if(fd < 0) return false;                                    
     epoll_event ev = {0};                                       // 创建epoll_event结构体
     ev.data.fd = fd;                                            // 设置文件描述符
     ev.events = events;                                         // 设置事件类型
