@@ -2,8 +2,8 @@
 #define WEBSERVER_H
 
 #include <unordered_map>
-#include <fcntl.h>                                          // fcntl()
-#include <unistd.h>                                         // close()
+#include <fcntl.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <sys/winsock.h>
@@ -23,10 +23,10 @@ public:
     WebServer(int port, int trigMode, int timeoutMS, bool OptLinger,  int sqlPort, const char* sqlUser, const  char* sqlPwd, 
         const char* dbName, int connPoolNum, int threadNum, bool openLog, int logLevel, int logQueSize);
     ~WebServer();
-    void Start();                                           // 启动服务器
+    void Start();                                               // 启动服务器
 
 private:
-    bool InitSocket_();                                     // 初始化 socket
+    bool InitSocket_();                                         // 初始化 socket
     void InitEventMode_(int trigMode);                      // 初始化事件模式
     void AddClient_(int fd, sockaddr_in addr);              // 添加客户端
     void DealListen_();                                     // 处理监听事件
@@ -42,7 +42,7 @@ private:
     static const int MAX_FD = 65536;                        // 最大 fd 数量
     static int SetFdNonblock(int fd);                       // 设置 fd 为非阻塞模式
 
-    int port_;                                              // 服务器端口
+    int port_;                                                  // 服务器端口
     bool openLinger_;                                       // 是否开启优雅关闭
     int timeoutMS_;                                         // 超时时间（毫秒）
     bool isClose_;                                          // 是否关闭服务器
