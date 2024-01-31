@@ -1,6 +1,56 @@
-# 压力测试
-> 测试环境: Ubuntu 20.04, 配置信息: ecs.e-c1m2.large 2核(vCPU) 4 GiB
+# 项目运行
+> 服务端环境: Ubuntu 20.04, 配置信息: ecs.e-c1m2.large 2核(vCPU) 4 GiB
+> 
+> 客户端环境: Windows10, Edge 浏览器
 
+**确保 MySQL 已安装**
+```sql
+// 创建数据库
+CREATE DATABASE webserver;
+USE webserver;
+
+// 创建数据表
+CREATE TABLE user(
+	username CHAR(50) NULL,
+	password CHAR(50) NULL
+) ENGINE=InnoDB;
+
+// 插入数据
+INSERT INTO user(username, password) VALUES('XAAA', 'YAAA');
+
+// 查看数据表内容
+SELECT username, password FROM user;
+```
+**修改 main.cpp 中数据库初始化信息**
+```
+WebServer server(1316, 3, 60000, false, 3306, "Mysql用户名", "Mysql密码", "数据库名", 12, 6, true, 1, 1024);
+```
+**服务端启动**
+```
+make
+./build/run_server
+```
+**客户端访问**
+```
+# 浏览器地址栏输入: (服务端的公有 IP: 端口)
+http://120.78.231.129:1316/
+```
+**首页页面**
+![avatar](./resources/md_img/SYYM.jpg)
+
+**图片页面**
+![avatar](./resources/md_img/TPYM.jpg)
+
+**视频页面**
+![avatar](./resources/md_img/SPYM.jpg)
+
+**登录页面**
+![avatar](./resources/md_img/DLYM.jpg)
+
+**成功页面**
+![avatar](./resources/md_img/WELCOME.jpg)
+
+# 压力测试
 ```shell
 cd ./webbench/
 make

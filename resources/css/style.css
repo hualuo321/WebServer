@@ -305,9 +305,9 @@ a:hover, a:active, a:focus {
   -webkit-align-items: center;
   -ms-flex-align: center;
    align-items: center;
-  height: 100vh;
+  height: 50vh;                        /* 调整容器间距 */
   position: relative;
-  padding-top: 62px;
+  padding-top: 500px;                  /* 调整与上方默认距离 */
 }
 
 #home img {
