@@ -7,10 +7,10 @@ OBJS = ./code/log/*.cpp ./code/pool/*.cpp ./code/timer/*.cpp \
        ./code/buffer/*.cpp ./code/main.cpp
 
 all: $(OBJS)
-	$(CXX) $(CFLAGS) $(OBJS) -o ./build/$(TARGET) -pthread -l mysqlclient
+	$(CXX) $(CFLAGS) $(OBJS) -o ./code/$(TARGET) -pthread -l mysqlclient
 
 clean:
-	rm -rf ./build/$(TARGET)
+	rm -rf ./code/$(TARGET)
 
 # -Wall: 显示所有警告
 # -g: 提供调试信息

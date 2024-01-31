@@ -28,7 +28,7 @@ WebServer server(1316, 3, 60000, false, 3306, "Mysql用户名", "Mysql密码", "
 **服务端启动**
 ```
 make
-./build/run_server
+./code/run_server
 ```
 **客户端访问**
 ```

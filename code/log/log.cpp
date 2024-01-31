@@ -186,7 +186,7 @@ void Log::flush() {
 void Log::AsyncWrite_() {
     string str = "";
     while(deque_->pop(str)) {               // 从日志队列中取出字符串
-        lock_guard<mutex> locker(mtx_);     // 枷锁
+        lock_guard<mutex> locker(mtx_);     // 
         fputs(str.c_str(), fp_);            // 将日志数据写入文件中 (通过 FILE* 文件句柄写入)
     }
 }
