@@ -47,7 +47,7 @@ public:
     void Append(const void* data, size_t len);
     // 追加另一个缓冲区的数据到当前缓冲区
     void Append(const Buffer& buff);
-    // 从文件描述符中读取数据到缓冲区
+    // 从 fd 中读取数据到缓冲区
     ssize_t ReadFd(int fd, int* Errno);
     // 将缓冲区的数据写入文件描述符
     ssize_t WriteFd(int fd, int* Errno);

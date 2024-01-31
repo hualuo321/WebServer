@@ -98,7 +98,7 @@ void Buffer::EnsureWriteable(size_t len) {
     assert(WritableBytes() >= len);
 }
 
-// 从文件描述符中读取数据到缓冲区
+// 从 fd 所对应的文件中，读取数据到缓冲区中
 ssize_t Buffer::ReadFd(int fd, int* saveErrno) {
     char buff[65535];                               // 临时缓冲区
     // 分散读, 一块指向当前 buffer_，一块指向临时缓冲区
@@ -118,7 +118,7 @@ ssize_t Buffer::ReadFd(int fd, int* saveErrno) {
     }
     else {
         writePos_ = buffer_.size();
-        Append(buff, len - writable);               // 写入多余的数据到缓冲区
+        Append(buff, len - writable);               // 写入剩余的内容到到临时缓冲区
     }
     return len;
 }

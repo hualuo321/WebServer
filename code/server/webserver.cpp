@@ -69,15 +69,19 @@ void WebServer::InitEventMode_(int trigMode) {
     HttpConn::isET = (connEvent_ & EPOLLET);// 设置客户端是否为边缘触发 (ET)
 }
 
-// 启动 Web 服务器
+/*  启动 Web 服务器
+    - 现在有一个定时器, 里面装的是所有 fd 的过期剩余时间, 用小根堆来存储, 根节点代表距离过期事件最短。
+    - 于是 epoll 实例获取那个最快的过期时间(正数), 并将之前已过期的时间清除(负数)。如果在这期间有事件发生, 就依次进行处理。
+    - epoll 会先从事件队列中取出一个事件, 可能是连接事件, 读事件, 写事件, 错误事件, 并进行相应的处理。
+ */
 void WebServer::Start() {
     int timeMS = -1;                                    // 下一个定时器距离超时的剩余时间
     if(!isClose_) { LOG_INFO("========== Server start =========="); }
     while(!isClose_) {                                  // 服务器没有关闭, 则一直运行
         if(timeoutMS_ > 0) {                            // 超时时间初始化为 6000ms
-            timeMS = timer_->GetNextTick();
+            timeMS = timer_->GetNextTick();             // 获取下一个超时时间
         }
-        int eventCnt = epoller_->Wait(timeMS);                      // 等待事件发生
+        int eventCnt = epoller_->Wait(timeMS);          // 等待事件发生, 最多阻塞 timeMS, 因为此时已经有事件过期, 把过期 fd 给断开连接
         for(int i = 0; i < eventCnt; i++) {
             // 处理每个事件
             int fd = epoller_->GetEventFd(i);
@@ -117,65 +121,70 @@ void WebServer::SendError_(int fd, const char*info) {
 void WebServer::CloseConn_(HttpConn* client) {
     assert(client);
     LOG_INFO("Client[%d] quit!", client->GetFd());
-    epoller_->DelFd(client->GetFd());                               // 从epoller中删除文件描述符
-    client->Close();                                                // 关闭Http连接
+    epoller_->DelFd(client->GetFd());               // 从 epoll 实例中删除 fd
+    client->Close();                                // 关闭 Http 连接对象
 }
 
 // 添加新客户端
 void WebServer::AddClient_(int fd, sockaddr_in addr) {
     assert(fd > 0);
-    users_[fd].init(fd, addr);                                      // 初始化Http连接
+    users_[fd].init(fd, addr);                      // 初始化 Http 连接对象
     if(timeoutMS_ > 0) {
-        // 如果设置了超时时间，添加到定时器中
+        // 如果设置了超时时间，将超时事件及对应的 fd 添加到定时器中
         timer_->add(fd, timeoutMS_, std::bind(&WebServer::CloseConn_, this, &users_[fd]));
     }
-    epoller_->AddFd(fd, EPOLLIN | connEvent_);                      // 将文件描述符添加到epoller, 监听读事件
-    SetFdNonblock(fd);                                              // 设置文件描述符为非阻塞模式
+    epoller_->AddFd(fd, EPOLLIN | connEvent_);      // 将 fd 添加到 epoll 实例, 监听读事件
+    SetFdNonblock(fd);                              // 设置 fd 为非阻塞模式
     LOG_INFO("Client[%d] in!", users_[fd].GetFd());
 }
 
-// 处理监听事件
+/*  处理监听事件
+    - 先创建一个空 c_addr 用于存放客户端的地址信息, 后续通过 accept() 将地址信息写入 c_addr
+    - 根据监听到的 cfd, c_addr 来添加 cfd 到 epoll 中, 并更新定时器,等信息
+    - 设置 cfd 为 ET 模式, 处理过的连接事件只会通知一次 
+*/
 void WebServer::DealListen_() {
-    struct sockaddr_in addr;                                        // 用于存放客户端的 IP 端口
+    struct sockaddr_in addr;                        // 用于存放客户端的地址信息
     socklen_t len = sizeof(addr);
     do {
-        int fd = accept(listenFd_, (struct sockaddr *)&addr, &len); // 将 accept 的客户信息放入 addr 中, 并返回 fd
-        if(fd <= 0) { return;}                                      // 如果文件描述符小于或等于0，则失败返回
-        else if(HttpConn::userCount >= MAX_FD) {                    // 如果当前用户数超过最大值，则发送服务器忙的消息并返回
+        // 将 accept 的客户信息放入 addr 中, 并返回 fd
+        int fd = accept(listenFd_, (struct sockaddr *)&addr, &len); 
+        if(fd <= 0) { return;}
+        else if(HttpConn::userCount >= MAX_FD) {    // 如果当前用户数超过最大值，则发送服务器忙的消息并返回
             SendError_(fd, "Server busy!");
             LOG_WARN("Clients is full!");
             return;
         }
-        AddClient_(fd, addr);                                       // 添加新客户端
-    } while(listenEvent_ & EPOLLET);                                // 如果是边缘触发，则循环接受所有连接
+        AddClient_(fd, addr);                       // 添加新客户端
+    } while(listenEvent_ & EPOLLET);                // 如果是边缘触发，则循环接受所有连接
 }
 
 // 处理读事件
 void WebServer::DealRead_(HttpConn* client) {
-    assert(client);                                                 // 断言客户端不为空
-    ExtentTime_(client);                                            // 延长客户端的超时时间
-    // 将读任务添加到线程池
+    assert(client);
+    ExtentTime_(client);                            // 如果发生读写事件, 则更新定时器, 重置超时时间
+    // 将读任务添加到线程池, 等待工作线程进行处理
     threadpool_->AddTask(std::bind(&WebServer::OnRead_, this, client));
 }
 
 // 处理写事件
 void WebServer::DealWrite_(HttpConn* client) {
-    assert(client);                                                 // 断言客户端不为空
-    ExtentTime_(client);                                            // 延长客户端的超时时间
-    // 将写任务添加到线程池
+    assert(client);
+    ExtentTime_(client);                            // 如果发生读写事件, 则更新定时器, 重置超时时间
+    // 将写任务添加到线程池, 等待工作线程进行处理
     threadpool_->AddTask(std::bind(&WebServer::OnWrite_, this, client));
 }
 
 // 延长客户端的超时时间
 void WebServer::ExtentTime_(HttpConn* client) {
-    assert(client);                                                 // 断言客户端不为空
+    assert(client);
     // 调整客户端在定时器中的时间
     if(timeoutMS_ > 0) { timer_->adjust(client->GetFd(), timeoutMS_); }
 }
 
 // 读取数据
 void WebServer::OnRead_(HttpConn* client) {
-    assert(client);                                                 // 断言客户端不为空
+    assert(client);
     int ret = -1;
     int readErrno = 0;
     ret = client->read(&readErrno);                                 // 读取数据

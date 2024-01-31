@@ -92,11 +92,14 @@ int epoll_create(int size);
 # (epoll 实例 fd, 添加/修改/删除, 待操作的 fd, fd 的事件类型)
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 
-# epoll_wait: 等待已注册的 fd 上发生事件，并返回发生事件 fd 的数量
+# epoll_wait: 等待已注册的 fd 上发生事件，并返回发生事件 fd 的数量, 如果阻塞 timeout 后没有事件, 则直接返回
 int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
 
 # close: 关闭一个已经使用的 socket, 并释放其资源
 int close(int sockfd);
+
+# read: 从 fd 所对应的文件中读取数据, 放入到缓冲区中
+ssize_t read(int fd, void *buf, size_t count);
 ```
 
 ## 常用结构

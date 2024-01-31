@@ -28,11 +28,11 @@ bool Epoller::ModFd(int fd, uint32_t events) {
     return 0 == epoll_ctl(epollFd_, EPOLL_CTL_MOD, fd, &ev);    // 向 epoll 实例修改 fd
 }
 
-// 删除 fd 到 epoll 实例中
+// 删除 fd 于 epoll 实例中
 bool Epoller::DelFd(int fd) {
     if(fd < 0) return false;
-    epoll_event ev = {0};                                       // 创建 epoll_event 结构体
-    return 0 == epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, &ev);    // 向 epoll 实例删除 fd
+    epoll_event ev = {0};
+    return 0 == epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, &ev);
 }
 
 // 等待事件发生, 并返回发生的事件数量

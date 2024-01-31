@@ -91,7 +91,7 @@ void HeapTimer::del_(size_t index) {
     heap_.pop_back();
 }
 
-// 调整指定id的定时器
+// 调整指定 id 的定时器过期时间
 void HeapTimer::adjust(int id, int timeout) {
     assert(!heap_.empty() && ref_.count(id) > 0);
     heap_[ref_[id]].expires = Clock::now() + MS(timeout);;

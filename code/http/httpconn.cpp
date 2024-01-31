@@ -17,15 +17,15 @@ HttpConn::~HttpConn() {
     Close(); 
 };
 
-// 初始化连接
+// 初始化客户端连接对象
 void HttpConn::init(int fd, const sockaddr_in& addr) {
-    assert(fd > 0);                                         // 确保文件描述符有效
+    assert(fd > 0);
     userCount++;                                            // 用户计数增加
-    addr_ = addr;                                           // 设置地址
-    fd_ = fd;                                               // 设置文件描述符
+    addr_ = addr;                                           // 设置地址信息
+    fd_ = fd;                                               // 设置 fd
     writeBuff_.RetrieveAll();                               // 清空写缓冲区
     readBuff_.RetrieveAll();                                // 清空读缓冲区
-    isClose_ = false;                                       // 设置为开启状态
+    isClose_ = false;                                       // 设置客户端为开启状态
     LOG_INFO("Client[%d](%s:%d) in, userCount:%d", fd_, GetIP(), GetPort(), (int)userCount);
 }
 
@@ -60,7 +60,7 @@ int HttpConn::GetPort() const {
     return addr_.sin_port;
 }
 
-// 读取数据
+// 读取数据, 将客户端读缓冲区的内容
 ssize_t HttpConn::read(int* saveErrno) {
     ssize_t len = -1;
     do {

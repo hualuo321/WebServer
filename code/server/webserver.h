@@ -55,8 +55,8 @@ private:
    
     std::unique_ptr<HeapTimer> timer_;              // 小根堆定时器
     std::unique_ptr<ThreadPool> threadpool_;        // 线程池
-    std::unique_ptr<Epoller> epoller_;              // Epoll实例
-    std::unordered_map<int, HttpConn> users_;       // 存储客户端连接用户
+    std::unique_ptr<Epoller> epoller_;              // Epoll 实例
+    std::unordered_map<int, HttpConn> users_;       // 用 map 存储 fd 到 HTTPCONN 的映射
 };
 
 #endif //WEBSERVER_H

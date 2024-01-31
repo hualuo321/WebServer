@@ -13,21 +13,21 @@
 #include "httprequest.h"
 #include "httpresponse.h"
 
-// HttpConn 类，处理一个HTTP连接
+// 客户端对应的连接类
 class HttpConn {
 public:
-    HttpConn();                                     // 构造函数
-    ~HttpConn();                                    // 析构函数
+    HttpConn();
+    ~HttpConn();
 
-    void init(int sockFd, const sockaddr_in& addr); // 初始化连接
+    void init(int sockFd, const sockaddr_in& addr); // 连接初始化
     ssize_t read(int* saveErrno);                   // 读取数据
     ssize_t write(int* saveErrno);                  // 写入数据
     void Close();                                   // 关闭连接
-    int GetFd() const;                              // 获取文件描述符
-    int GetPort() const;                            // 获取端口
-    const char* GetIP() const;                      // 获取IP地址
-    sockaddr_in GetAddr() const;                    // 获取sockaddr_in地址
-    bool process();                                 // 处理读取到的请求
+    int GetFd() const;                              // 获取 fd
+    int GetPort() const;                            // 获取 port
+    const char* GetIP() const;                      // 获取 IP
+    sockaddr_in GetAddr() const;                    // 获取 地址信息
+    bool process();                                 // 处理用户请求, 比如解析 HTTP 网页
 
     int ToWriteBytes() {                            // 待写入数据的字节数
         return iov_[0].iov_len + iov_[1].iov_len;   
@@ -42,18 +42,18 @@ public:
 
 private:
     int fd_;                                        // 文件描述符
-    struct  sockaddr_in addr_;                      // 客户端地址
+    struct  sockaddr_in addr_;                      // 客户端地址信息 (协议族, TCP, IP 端口)
 
     bool isClose_;                                  // 连接是否关闭
     
-    int iovCnt_;                                    // writev使用的iovec计数
-    struct iovec iov_[2];                           // iovec数组，用于readv/writev
+    int iovCnt_;                                    // 分散读写的通道数
+    struct iovec iov_[2];                           // iovec 数组，用于分散读写
     
     Buffer readBuff_;                               // 读缓冲区
     Buffer writeBuff_;                              // 写缓冲区
 
-    HttpRequest request_;                           // HTTP请求
-    HttpResponse response_;                         // HTTP响应
+    HttpRequest request_;                           // HTTP请求对象
+    HttpResponse response_;                         // HTTP响应对象
 };
 
 #endif //HTTP_CONN_H
