@@ -35,7 +35,8 @@ make
 # 浏览器地址栏输入: (服务端的公有 IP: 端口)
 http://120.78.231.129:1316/
 ```
-
+# 流程框图
+![avatar](./resources/md_img/LCKT.jpg)
 # 页面展示
 **首页页面**
 ![avatar](./resources/md_img/SYYM.jpg)
